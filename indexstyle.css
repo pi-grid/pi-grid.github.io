@@ -1,39 +1,113 @@
+/* --- 1. GLOBAL RESETS & FONTS --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    /* Neon Green to Dark Green background gradient */
     background: linear-gradient(135deg, #0b2512 0%, #020c04 100%);
     color: #e2e8f0;
+    min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    margin: 0;
+    padding: 20px;
 }
 
-.container {
+/* --- 2. GLOBAL CONTAINER CAARD --- */
+.container, .card, .calculator {
     text-align: center;
-    padding: 3rem;
+    padding: 2.5rem;
     border: 1px solid #10b981;
     border-radius: 12px;
-    background-color: rgba(10, 25, 14, 0.8);
-    /* Subtle neon glow around the card */
-    box-shadow: 0 8px 32px 0 rgba(16, 185, 129, 0.1);
-    backdrop-filter: blur(4px);
+    background-color: rgba(10, 25, 14, 0.85);
+    box-shadow: 0 8px 32px 0 rgba(16, 185, 129, 0.15);
+    backdrop-filter: blur(6px);
+    width: 100%;
+    max-width: 450px; /* Standard single-card layout width */
 }
 
-h1 {
-    /* Bright Neon Green text color with a soft text-glow */
+/* --- 3. HEADINGS & TEXT --- */
+h1, h2, h3 {
     color: #39ff14;
-    font-size: 3rem;
-    margin: 0 0 0.5rem 0;
-    text-shadow: 0 0 10px rgba(57, 255, 20, 0.5);
+    text-shadow: 0 0 10px rgba(57, 255, 20, 0.4);
     letter-spacing: 1px;
+    margin-bottom: 1rem;
 }
+
+h1 { font-size: 2.8rem; }
+h2 { font-size: 2rem; }
 
 p {
-    /* Clean platinum-gray color for high contrast and readability */
     color: #cbd5e1;
-    font-size: 1.2rem;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+}
+
+/* --- 4. BUTTONS --- */
+button, .btn {
+    background: rgba(16, 185, 129, 0.1);
+    color: #39ff14;
+    border: 1px solid #10b981;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* Button Hover State (Neon Glow Effect) */
+button:hover, .btn:hover {
+    background: #10b981;
+    color: #020c04;
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.6);
+    transform: translateY(-2px);
+}
+
+/* Button Click/Active State */
+button:active, .btn:active {
+    transform: translateY(0);
+}
+
+/* --- 5. INPUT FIELDS & TEXTAREAS --- */
+input[type="text"], input[type="number"], input[type="password"], textarea, select {
+    width: 100%;
+    background: rgba(2, 12, 4, 0.6);
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    padding: 0.75rem;
+    color: #e2e8f0;
+    font-size: 1.1rem;
+    border-radius: 6px;
+    outline: none;
+    transition: all 0.3s ease;
+    margin-bottom: 1rem;
+}
+
+/* Input Focus State */
+input:focus, textarea:focus, select:focus {
+    border-color: #39ff14;
+    box-shadow: 0 0 10px rgba(57, 255, 20, 0.3);
+}
+
+/* --- 6. LINKS --- */
+a {
+    color: #39ff14;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    text-decoration: underline;
+    text-shadow: 0 0 5px rgba(57, 255, 20, 0.5);
+}
     margin: 0;
     text-transform: uppercase;
     letter-spacing: 2px;
