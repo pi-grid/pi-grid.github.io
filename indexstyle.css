@@ -1,0 +1,40 @@
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    /* Neon Green to Dark Green background gradient */
+    background: linear-gradient(135deg, #0b2512 0%, #020c04 100%);
+    color: #e2e8f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.container {
+    text-align: center;
+    padding: 3rem;
+    border: 1px solid #10b981;
+    border-radius: 12px;
+    background-color: rgba(10, 25, 14, 0.8);
+    /* Subtle neon glow around the card */
+    box-shadow: 0 8px 32px 0 rgba(16, 185, 129, 0.1);
+    backdrop-filter: blur(4px);
+}
+
+h1 {
+    /* Bright Neon Green text color with a soft text-glow */
+    color: #39ff14;
+    font-size: 3rem;
+    margin: 0 0 0.5rem 0;
+    text-shadow: 0 0 10px rgba(57, 255, 20, 0.5);
+    letter-spacing: 1px;
+}
+
+p {
+    /* Clean platinum-gray color for high contrast and readability */
+    color: #cbd5e1;
+    font-size: 1.2rem;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
