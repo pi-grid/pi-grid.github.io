@@ -1,0 +1,136 @@
+/* --- 1. GLOBAL ENVIRONMENT MATCH --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    /* Neon Green to Dark Green background gradient from homepage */
+    background: linear-gradient(135deg, #0b2512 0%, #020c04 100%);
+    color: #e2e8f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    padding: 20px;
+}
+
+/* --- 2. CALCULATOR WINDOW CONTAINER --- */
+.calculator {
+    text-align: center;
+    padding: 2rem;
+    border: 1px solid #10b981;
+    border-radius: 12px;
+    background-color: rgba(10, 25, 14, 0.85);
+    /* Neon glow effect matching your homepage container */
+    box-shadow: 0 8px 32px 0 rgba(16, 185, 129, 0.15);
+    backdrop-filter: blur(6px);
+    width: 100%;
+    max-width: 360px; /* Optimized structural calculator width */
+}
+
+/* --- 3. THE DISPLAY PANEL --- */
+.display {
+    width: 100%;
+    height: 60px;
+    background: rgba(2, 12, 4, 0.7);
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    border-radius: 6px;
+    padding: 0 1rem;
+    color: #39ff14; /* Cyber green numeric text */
+    font-size: 1.8rem;
+    text-align: right;
+    outline: none;
+    margin-bottom: 1.5rem;
+    letter-spacing: 1px;
+    font-family: monospace; /* Preserves alignment for numeric evaluation strings */
+    text-shadow: 0 0 5px rgba(57, 255, 20, 0.3);
+    transition: all 0.3s ease;
+}
+
+/* Accent flash if the panel gains focus natively */
+.display:focus {
+    border-color: #39ff14;
+    box-shadow: 0 0 10px rgba(57, 255, 20, 0.2);
+}
+
+/* --- 4. THE INTERACTIVE GRID SYSTEM --- */
+.buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+/* --- 5. COMPONENT ELEMENT BUTTONS --- */
+.btn {
+    background: rgba(16, 185, 129, 0.05);
+    color: #cbd5e1; /* Base platinum grey from homepage paragraph styles */
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    padding: 1rem 0;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* Shared Hover Micro-interaction */
+.btn:hover {
+    background: rgba(16, 185, 129, 0.2);
+    border-color: #10b981;
+    color: #39ff14;
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+    transform: translateY(-1px);
+}
+
+.btn:active {
+    transform: translateY(1px);
+}
+
+/* Type Grouping A: Operator Functions (+, -, ×, ÷, sin, cos) */
+.btn.operator {
+    color: #10b981; /* Medium Emerald highlight */
+    background: rgba(16, 185, 129, 0.1);
+    border-color: rgba(16, 185, 129, 0.4);
+}
+
+.btn.operator:hover {
+    color: #39ff14;
+    background: rgba(16, 185, 129, 0.3);
+}
+
+/* Type Grouping B: Memory / Deletion Controls (C, DEL.) */
+.btn.control {
+    color: #ef4444; /* Distinct red warning tint */
+    border-color: rgba(239, 68, 68, 0.3);
+    background: rgba(239, 68, 68, 0.05);
+}
+
+.btn.control:hover {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: #ef4444;
+    color: #ff6b6b;
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+}
+
+/* Type Grouping C: Submission/Execution (✓ / Equals Button) */
+.btn.equals {
+    background: #10b981;
+    color: #020c04; /* High-contrast inversion matching homepage designs */
+    border-color: #39ff14;
+    font-size: 1.3rem;
+}
+
+.btn.equals:hover {
+    background: #39ff14;
+    color: #020c04;
+    box-shadow: 0 0 15px rgba(57, 255, 20, 0.6);
+}
+
+/* Grid Layout Overrides (Wide '0' span matching template requirements) */
+.btn.wide {
+    grid-column: span 2;
+}
