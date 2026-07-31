@@ -57,7 +57,8 @@
         }
 
         /* --- 4. BUTTONS --- */
-        button, .btn {
+        button, .btn, .btn-link {
+            display: block;
             width: 100%;
             background: rgba(16, 185, 129, 0.1);
             color: #39ff14;
@@ -71,16 +72,20 @@
             letter-spacing: 1px;
             text-transform: uppercase;
             margin-top: 0.5rem;
+            text-align: center;
+            text-decoration: none; /* Reset link underline for standard button view */
         }
 
-        button:hover, .btn:hover {
+        button:hover, .btn:hover, .btn-link:hover {
             background: #10b981;
             color: #020c04;
             box-shadow: 0 0 15px rgba(16, 185, 129, 0.6);
             transform: translateY(-2px);
+            text-decoration: none;
+            text-shadow: none;
         }
 
-        button:active, .btn:active {
+        button:active, .btn:active, .btn-link:active {
             transform: translateY(0);
         }
 
@@ -136,7 +141,6 @@
             border-color: #ff3939 !important;
         }
 
-        /* Custom warning subtext style for owner key */
         .owner-notice {
             color: #ff3939 !important;
             font-size: 0.8rem;
@@ -181,7 +185,8 @@
         <input type="password" id="ownerPasscodeField" placeholder="ENTER OWNER OVERRIDE KEY...">
         <button onclick="validateOwnerOverride()" style="margin-bottom: 1rem; background: rgba(255, 57, 57, 0.1); color: #ff3939; border-color: #ff3939;">OVERRIDE EXPIRED SYSTEM</button>
         
-        <button onclick="resetSystemView()" class="critical-border" style="color: #ff3939;">RETURN TO CORE</button>
+        <!-- Updated to structural absolute local link target -->
+        <a href="readonce.html" class="btn-link critical-border" style="color: #ff3939;">RETURN TO CORE</a>
     </div>
 </div>
 
@@ -213,6 +218,16 @@
             } catch (e) {
                 document.getElementById('noteDisplay').value = "ERROR // CORRUPTED DATA PACKET.";
             }
+        }
+
+        // Add event listener to submit passcode with "Enter" key press
+        const pswField = document.getElementById('ownerPasscodeField');
+        if(pswField) {
+            pswField.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter') {
+                    validateOwnerOverride();
+                }
+            });
         }
     };
 
@@ -249,7 +264,7 @@
         const encryptedText = btoa(text);
         const uniqueId = Math.floor(Math.random() * 1000000);
         
-        const baseUrl = window.location.href.split('?');
+        const baseUrl = window.location.href.split('?')[0];
         const finalSecureLink = `${baseUrl}?id=${uniqueId}&msg=${encryptedText}`;
 
         document.getElementById('shareableLink').innerText = finalSecureLink;
@@ -271,21 +286,3 @@
     function fallbackCopyAction(text) {
         const tempTextArea = document.createElement("textarea");
         tempTextArea.value = text;
-        document.body.appendChild(tempTextArea);
-        tempTextArea.select();
-        try {
-            document.execCommand("copy");
-            document.getElementById('copyStatusText').innerText = "LINK GENERATED & COPIED TO CLIPBOARD";
-        } catch (err) {
-            document.getElementById('copyStatusText').innerText = "LINK GENERATED (MANUALLY COPY ABOVE)";
-        }
-        document.body.removeChild(tempTextArea);
-    }
-
-    function resetSystemView() {
-        window.location.href = window.location.href.split('?');
-    }
-</script>
-
-</body>
-</html>
