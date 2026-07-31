@@ -92,8 +92,19 @@
         // Mouse & Touch Tracking System For Canvas Movements
         function handleColorMove(e) {
             const rect = svBox.getBoundingClientRect();
-            let x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
-            let y = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
+            
+            // Handle both touch and mouse positions properly
+            let clientX, clientY;
+            if (e.touches && e.touches.length > 0) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+
+            let x = clientX - rect.left;
+            let y = clientY - rect.top;
 
             x = Math.max(0, Math.min(x, rect.width));
             y = Math.max(0, Math.min(y, rect.height));
@@ -107,14 +118,30 @@
             updateColors();
         }
 
+        // --- MOUSE LISTENERS ---
         svBox.addEventListener('mousedown', (e) => { isDragging = true; handleColorMove(e); });
         window.addEventListener('mousemove', (e) => { if (isDragging) handleColorMove(e); });
         window.addEventListener('mouseup', () => isDragging = false);
 
-        svBox.addEventListener('touchstart', (e) => { isDragging = true; handleColorMove(e); }, { passive: true });
-        window.addEventListener('touchmove', (e) => { if (isDragging) handleColorMove(e); }, { passive: true });
-        window.addEventListener('touchend', () => isDragging = false);
+        // --- MOBILE TOUCH LISTENERS (FIXED PAGE SCROLL BUG) ---
+        svBox.addEventListener('touchstart', (e) => { 
+            isDragging = true; 
+            if (e.cancelable) e.preventDefault(); // Stop mobile from scrolling the webpage
+            handleColorMove(e); 
+        }, { passive: false });
 
+        window.addEventListener('touchmove', (e) => { 
+            if (isDragging) {
+                if (e.cancelable) e.preventDefault(); // Lock screen scrolling while dragging pointer
+                handleColorMove(e); 
+            }
+        }, { passive: false });
+
+        window.addEventListener('touchend', () => { 
+            isDragging = false; 
+        });
+
+        // --- SLIDERS ---
         hueSlider.addEventListener('input', (e) => {
             currentHue = e.target.value;
             svBox.style.backgroundColor = `hsl(${currentHue}, 100%, 50%)`;
