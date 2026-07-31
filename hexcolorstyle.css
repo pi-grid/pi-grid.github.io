@@ -1,0 +1,238 @@
+/* ==========================================================================
+   HEXCOLORSTYLE.CSS - PRO COLOR PICKER ENGINE STYLES
+   ========================================================================== */
+
+/* --- 1. INTERACTIVE PICKER BOARD --- */
+.picker-engine {
+    background: rgba(2, 12, 4, 0.85);
+    border: 1px solid #10b981;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+    display: block; /* Forces container visibility */
+    width: 100%;
+}
+
+/* Google Style Color Field Canvas Block */
+.sv-box {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    border-radius: 6px;
+    border: 1px solid rgba(16, 185, 129, 0.5);
+    cursor: crosshair;
+    overflow: hidden;
+    margin-bottom: 20px;
+    display: block;
+    /* Generates the layered saturation & value shades over the base color */
+    background-image: 
+        linear-gradient(to top, #000000, transparent), 
+        linear-gradient(to right, #ffffff, transparent);
+    background-blend-mode: normal;
+}
+
+/* Floating Crosshair Picker Pointer */
+.sv-pointer {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    transform: translate(-7px, -7px); /* Perfectly aligns the ring center with crosshair coordinate */
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
+    pointer-events: none;
+    z-index: 10;
+    left: 100%;
+    top: 0%;
+    display: block;
+}
+
+/* --- 2. CONTROL SLIDERS (HUE & ALPHA) --- */
+.slider-row {
+    margin-bottom: 15px;
+    display: block;
+    width: 100%;
+}
+
+.slider-row:last-child {
+    margin-bottom: 0;
+}
+
+.picker-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 12px;
+    border-radius: 6px;
+    outline: none;
+    background: transparent;
+    cursor: pointer;
+    display: block;
+}
+
+/* Customized Slider Thumbs */
+.picker-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 2px solid #10b981;
+    box-shadow: 0 0 8px rgba(57, 255, 20, 0.8);
+    cursor: pointer;
+    margin-top: 0px;
+}
+
+.picker-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 2px solid #10b981;
+    box-shadow: 0 0 8px rgba(57, 255, 20, 0.8);
+    cursor: pointer;
+    border-none: none;
+}
+
+/* Slider Track Gradients */
+#hueSlider {
+    background: linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%);
+}
+
+#alphaSlider {
+    /* Cyberpunk grid transparency tile checkerboard pattern simulation */
+    background-image: linear-gradient(45deg, #111 25%, transparent 25%), linear-gradient(-45deg, #111 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #111 75%), linear-gradient(-45deg, transparent 75%, #111 75%);
+    background-size: 8px 8px;
+    background-position: 0 0, 0 4px, 4px -4px, -4px 0px;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+/* --- 3. LIVE SAMPLE PREVIEW STRIP --- */
+.preview-strip {
+    width: 100%;
+    height: 40px;
+    border-radius: 6px;
+    border: 1px solid #10b981;
+    margin-bottom: 20px;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.8), 0 0 10px rgba(16, 185, 129, 0.15);
+    display: block; /* Fixed rendering box collapse bugs */
+}
+
+/* --- 4. FORMAT VALUE OUTPUT SYSTEM --- */
+.output-group {
+    text-align: left;
+    margin-bottom: 0.8rem;
+    display: block;
+    width: 100%;
+}
+
+.output-label {
+    color: #39ff14;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.4rem;
+    display: block;
+}
+
+.output-box {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+}
+
+.output-box input {
+    width: 100%;
+    background: rgba(2, 12, 4, 0.6);
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    padding: 0.7rem;
+    color: #e2e8f0;
+    font-size: 1rem;
+    border-radius: 6px;
+    outline: none;
+    font-family: monospace;
+}
+
+/* --- 5. INTERACTIVE SELECTOR TABS & COPY MODULE --- */
+.format-switcher-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    margin-bottom: 1.5rem;
+    width: 100%;
+}
+
+.format-tab {
+    flex: 1;
+    background: rgba(16, 185, 129, 0.05);
+    color: #cbd5e1;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    padding: 0.6rem;
+    font-size: 0.8rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: all 0.2s ease;
+}
+
+.format-tab:hover {
+    border-color: #10b981;
+    color: #39ff14;
+}
+
+.format-tab.active {
+    background: rgba(16, 185, 129, 0.2);
+    border-color: #39ff14;
+    color: #39ff14;
+    box-shadow: 0 0 8px rgba(57, 255, 20, 0.3);
+}
+
+.copy-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: rgba(16, 185, 129, 0.1);
+    color: #39ff14;
+    border: 1px solid #10b981;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    letter-spacing: 1px;
+    white-space: nowrap;
+    text-transform: uppercase;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.copy-btn:hover {
+    background: #10b981;
+    color: #020c04;
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.6);
+}
+
+.btn-icon {
+    font-size: 0.95rem;
+}
+
+/* --- 6. NAVIGATION NAVIGATION SYSTEM --- */
+.back-home {
+    display: inline-block;
+    margin-top: 1rem;
+    color: #10b981;
+    text-decoration: none;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+}
+
+.back-home:hover {
+    color: #39ff14;
+    text-shadow: 0 0 5px rgba(57, 255, 20, 0.5);
+    text-decoration: underline;
+}
