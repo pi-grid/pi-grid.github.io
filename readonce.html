@@ -73,7 +73,7 @@
             text-transform: uppercase;
             margin-top: 0.5rem;
             text-align: center;
-            text-decoration: none; /* Reset link underline for standard button view */
+            text-decoration: none;
         }
 
         button:hover, .btn:hover, .btn-link:hover {
@@ -156,7 +156,7 @@
 
 <div class="container">
     <!-- VIEW 1: GENERATE DATA LAYER -->
-    <div id="createView">
+    <div id="createView" class="hidden">
         <h2>READ ONCE NOTES</h2>
         <p>This note can only be intercepted and read exactly once.</p>
         <textarea id="noteInput" placeholder="ENTER SECRET DATA MATRIX..."></textarea>
@@ -168,121 +168,35 @@
         </div>
     </div>
 
-    <!-- VIEW 2: SINGLE-ACCESS READ LAYER -->
+    <!-- VIEW 2: INTERMEDIATE RECIPIENT LANDING LAYER -->
+    <div id="landingView" class="hidden">
+        <h2>SECURE NOTE DETECTED</h2>
+        <p>A sealed encrypted message is waiting. Once you decrypt it, it will be wiped from system buffers forever.</p>
+        <button onclick="triggerDecryptionEngine()" style="background: rgba(57, 255, 20, 0.1); box-shadow: 0 0 10px rgba(57, 255, 20, 0.2);">UNLOCK & DECRYPT NOTE</button>
+    </div>
+
+    <!-- VIEW 3: SINGLE-ACCESS READ LAYER -->
     <div id="readView" class="hidden">
         <h2>NOTE DECRYPTED</h2>
         <p>Warning: System access token expires if you leave or reload.</p>
         <textarea id="noteDisplay" readonly></textarea>
     </div>
 
-    <!-- VIEW 3: TERMINATED ACCESS LAYER -->
+    <!-- VIEW 4: TERMINATED ACCESS LAYER -->
     <div id="expiredView" class="hidden">
         <h2 class="critical-alert">ACCESS TERMINATED</h2>
         <p>This data packet has already been read once and deleted from memory buffers.</p>
         
-        <!-- Owner Bypass Input Layer with Pretext -->
         <p class="owner-notice">ONLY OWNER HAS ACCESS...</p>
         <input type="password" id="ownerPasscodeField" placeholder="ENTER OWNER OVERRIDE KEY...">
         <button onclick="validateOwnerOverride()" style="margin-bottom: 1rem; background: rgba(255, 57, 57, 0.1); color: #ff3939; border-color: #ff3939;">OVERRIDE EXPIRED SYSTEM</button>
         
-        <!-- Updated to structural absolute local link target -->
         <a href="readonce.html" class="btn-link critical-border" style="color: #ff3939;">RETURN TO CORE</a>
     </div>
 </div>
 
-<script>
-    let backupEncryptedPayload = "";
+<!-- Linked External JavaScript File -->
+<script src="readoncescript.js"></script>
 
-    window.onload = function() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const secretData = urlParams.get('msg');
-        const noteId = urlParams.get('id');
-
-        if (secretData && noteId) {
-            backupEncryptedPayload = secretData;
-
-            if (localStorage.getItem('read_' + noteId)) {
-                document.getElementById('createView').classList.add('hidden');
-                document.getElementById('expiredView').classList.remove('hidden');
-                return;
-            }
-
-            localStorage.setItem('read_' + noteId, 'true');
-
-            document.getElementById('createView').classList.add('hidden');
-            document.getElementById('readView').classList.remove('hidden');
-
-            try {
-                const decryptedText = atob(secretData);
-                document.getElementById('noteDisplay').value = decryptedText;
-            } catch (e) {
-                document.getElementById('noteDisplay').value = "ERROR // CORRUPTED DATA PACKET.";
-            }
-        }
-
-        // Add event listener to submit passcode with "Enter" key press
-        const pswField = document.getElementById('ownerPasscodeField');
-        if(pswField) {
-            pswField.addEventListener('keydown', function(event) {
-                if (event.key === 'Enter') {
-                    validateOwnerOverride();
-                }
-            });
-        }
-    };
-
-    function validateOwnerOverride() {
-        const enteredKey = document.getElementById('ownerPasscodeField').value.trim();
-        
-        if (enteredKey === "OwnerKey") {
-            if (backupEncryptedPayload) {
-                try {
-                    const decryptedText = atob(backupEncryptedPayload);
-                    document.getElementById('noteDisplay').value = decryptedText;
-                    
-                    document.getElementById('expiredView').classList.add('hidden');
-                    document.getElementById('readView').classList.remove('hidden');
-                } catch(e) {
-                    alert("OVERRIDE ERROR: PAYLOAD STORAGE COMPROMISED");
-                }
-            } else {
-                alert("OVERRIDE ERROR: EMPTY ENCRYPTED MAP STRING");
-            }
-        } else {
-            alert("SECURITY VIOLATION: AUTHENTICATION TOKEN INVALID");
-            document.getElementById('ownerPasscodeField').value = "";
-        }
-    }
-
-    function generateReadOnceLink() {
-        const text = document.getElementById('noteInput').value.trim();
-        if (!text) {
-            alert("MATRIX ERROR: INPUT BUFFER EMPTY");
-            return;
-        }
-
-        const encryptedText = btoa(text);
-        const uniqueId = Math.floor(Math.random() * 1000000);
-        
-        const baseUrl = window.location.href.split('?')[0];
-        const finalSecureLink = `${baseUrl}?id=${uniqueId}&msg=${encryptedText}`;
-
-        document.getElementById('shareableLink').innerText = finalSecureLink;
-        document.getElementById('resultBox').classList.remove('hidden');
-        
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(finalSecureLink)
-                .then(() => {
-                    document.getElementById('copyStatusText').innerText = "LINK GENERATED & COPIED TO CLIPBOARD";
-                })
-                .catch(() => {
-                    fallbackCopyAction(finalSecureLink);
-                });
-        } else {
-            fallbackCopyAction(finalSecureLink);
-        }
-    }
-
-    function fallbackCopyAction(text) {
-        const tempTextArea = document.createElement("textarea");
-        tempTextArea.value = text;
+</body>
+</html>
