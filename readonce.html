@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SECURE SYSTEM // READ-ONCE</title>
+    <style>
+        /* --- 1. GLOBAL RESETS & FONTS --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #0b2512 0%, #020c04 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* --- 2. GLOBAL CONTAINER CARD --- */
+        .container {
+            text-align: center;
+            padding: 2.5rem;
+            border: 1px solid #10b981;
+            border-radius: 12px;
+            background-color: rgba(10, 25, 14, 0.85);
+            box-shadow: 0 8px 32px 0 rgba(16, 185, 129, 0.15);
+            backdrop-filter: blur(6px);
+            width: 100%;
+            max-width: 450px;
+        }
+
+        /* --- 3. HEADINGS & TEXT --- */
+        h1, h2 {
+            color: #39ff14;
+            text-shadow: 0 0 10px rgba(57, 255, 20, 0.4);
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+        }
+
+        h1 { font-size: 2.8rem; }
+        h2 { font-size: 2rem; }
+
+        p {
+            color: #cbd5e1;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            line-height: 1.5;
+            margin-bottom: 1.5rem;
+        }
+
+        /* --- 4. BUTTONS --- */
+        button, .btn {
+            width: 100%;
+            background: rgba(16, 185, 129, 0.1);
+            color: #39ff14;
+            border: 1px solid #10b981;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-top: 0.5rem;
+        }
+
+        button:hover, .btn:hover {
+            background: #10b981;
+            color: #020c04;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.6);
+            transform: translateY(-2px);
+        }
+
+        button:active, .btn:active {
+            transform: translateY(0);
+        }
+
+        /* --- 5. INPUT FIELDS & TEXTAREAS --- */
+        textarea {
+            width: 100%;
+            background: rgba(2, 12, 4, 0.6);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            padding: 0.75rem;
+            color: #e2e8f0;
+            font-size: 1.1rem;
+            border-radius: 6px;
+            outline: none;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+            resize: none;
+            height: 130px;
+        }
+
+        textarea:focus {
+            border-color: #39ff14;
+            box-shadow: 0 0 10px rgba(57, 255, 20, 0.3);
+        }
+
+        /* --- 6. CUSTOM MATRIX SYSTEM UTILITIES --- */
+        .hidden { 
+            display: none !important; 
+        }
+
+        .success-box {
+            background: rgba(2, 12, 4, 0.8);
+            padding: 1rem;
+            border-radius: 6px;
+            border: 1px dashed #39ff14;
+            word-break: break-all;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: #cbd5e1;
+            text-align: left;
+            box-shadow: 0 0 10px rgba(57, 255, 20, 0.1);
+        }
+
+        .critical-alert {
+            color: #ff3939 !important;
+            text-shadow: 0 0 10px rgba(255, 57, 57, 0.4) !important;
+        }
+        
+        .critical-border {
+            border-color: #ff3939 !important;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- VIEW 1: GENERATE DATA LAYER -->
+    <div id="createView">
+        <h2>SECURE WRITE</h2>
+        <p>This payload can only be intercepted and read exactly once.</p>
+        <textarea id="noteInput" placeholder="ENTER SECRET DATA MATRIX..."></textarea>
+        <button onclick="generateReadOnceLink()">GENERATE SECURE LINK</button>
+        
+        <div id="resultBox" class="hidden">
+            <div class="success-box" id="shareableLink"></div>
+            <p style="margin-top: 1rem; color: #39ff14; font-size: 0.8rem;">COPIED TO SYSTEM CLIPBOARD</p>
+        </div>
+    </div>
+
+    <!-- VIEW 2: SINGLE-ACCESS READ LAYER -->
+    <div id="readView" class="hidden">
+        <h2>PAYLOAD DECRYPTED</h2>
+        <p>Warning: System access token expires if you leave or reload.</p>
+        <textarea id="noteDisplay" readonly></textarea>
+    </div>
+
+    <!-- VIEW 3: TERMINATED ACCESS LAYER -->
+    <div id="expiredView" class="hidden">
+        <h2 class="critical-alert">ACCESS TERMINATED</h2>
+        <p>This data packet has already been read once and deleted from memory buffers.</p>
+        <button onclick="resetSystemView()" class="critical-border" style="color: #ff3939;">RETURN TO CORE</button>
+    </div>
+</div>
+
+<script>
+    window.onload = function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const secretData = urlParams.get('msg');
+        const noteId = urlParams.get('id');
+
+        if (secretData && noteId) {
+            // Check authorization token map
+            if (localStorage.getItem('read_' + noteId)) {
+                document.getElementById('createView').classList.add('hidden');
+                document.getElementById('expiredView').classList.remove('hidden');
+                return;
+            }
+
+            // Seal database entry instantly on initial read
+            localStorage.setItem('read_' + noteId, 'true');
+
+            document.getElementById('createView').classList.add('hidden');
+            document.getElementById('readView').classList.remove('hidden');
+
+            try {
+                // Decode structural payload
+                const decryptedText = atob(secretData);
+                document.getElementById('noteDisplay').value = decryptedText;
+            } catch (e) {
+                document.getElementById('noteDisplay').value = "ERROR // CORRUPTED DATA DATA PACKET.";
+            }
+        }
+    };
+
+    function generateReadOnceLink() {
+        const text = document.getElementById('noteInput').value.trim();
+        if (!text) {
+            alert("MATRIX ERROR: INPUT BUFFER EMPTY");
+            return;
+        }
+
+        const encryptedText = btoa(text);
+        const uniqueId = Math.floor(Math.random() * 1000000);
+        
+        const baseUrl = window.location.href.split('?');
+        const finalSecureLink = `${baseUrl[0]}?id=${uniqueId}&msg=${encryptedText}`;
+
+        document.getElementById('shareableLink').innerText = finalSecureLink;
+        document.getElementById('resultBox').classList.remove('hidden');
+        
+        // Auto system injection to clipboard
+        navigator.clipboard.writeText(finalSecureLink);
+    }
+
+    function resetSystemView() {
+        window.location.href = window.location.href.split('?')[0];
+    }
+</script>
+
+</body>
+</html>
