@@ -30,6 +30,7 @@
         linear-gradient(to top, #000000, transparent), 
         linear-gradient(to right, #ffffff, transparent);
     background-blend-mode: normal;
+    touch-action: none;
 }
 
 /* Floating Crosshair Picker Pointer */
