@@ -85,7 +85,7 @@
         }
 
         /* --- 5. INPUT FIELDS & TEXTAREAS --- */
-        textarea {
+        input[type="password"], textarea {
             width: 100%;
             background: rgba(2, 12, 4, 0.6);
             border: 1px solid rgba(16, 185, 129, 0.4);
@@ -97,10 +97,13 @@
             transition: all 0.3s ease;
             margin-bottom: 1rem;
             resize: none;
+        }
+
+        textarea {
             height: 130px;
         }
 
-        textarea:focus {
+        input:focus, textarea:focus {
             border-color: #39ff14;
             box-shadow: 0 0 10px rgba(57, 255, 20, 0.3);
         }
@@ -132,6 +135,17 @@
         .critical-border {
             border-color: #ff3939 !important;
         }
+
+        /* Custom warning subtext style for owner key */
+        .owner-notice {
+            color: #ff3939 !important;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 5px rgba(255, 57, 57, 0.3);
+            text-transform: uppercase;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -161,17 +175,27 @@
     <div id="expiredView" class="hidden">
         <h2 class="critical-alert">ACCESS TERMINATED</h2>
         <p>This data packet has already been read once and deleted from memory buffers.</p>
+        
+        <!-- Owner Bypass Input Layer with Pretext -->
+        <p class="owner-notice">ONLY OWNER HAS ACCESS...</p>
+        <input type="password" id="ownerPasscodeField" placeholder="ENTER OWNER OVERRIDE KEY...">
+        <button onclick="validateOwnerOverride()" style="margin-bottom: 1rem; background: rgba(255, 57, 57, 0.1); color: #ff3939; border-color: #ff3939;">OVERRIDE EXPIRED SYSTEM</button>
+        
         <button onclick="resetSystemView()" class="critical-border" style="color: #ff3939;">RETURN TO CORE</button>
     </div>
 </div>
 
 <script>
+    let backupEncryptedPayload = "";
+
     window.onload = function() {
         const urlParams = new URLSearchParams(window.location.search);
         const secretData = urlParams.get('msg');
         const noteId = urlParams.get('id');
 
         if (secretData && noteId) {
+            backupEncryptedPayload = secretData;
+
             if (localStorage.getItem('read_' + noteId)) {
                 document.getElementById('createView').classList.add('hidden');
                 document.getElementById('expiredView').classList.remove('hidden');
@@ -192,6 +216,29 @@
         }
     };
 
+    function validateOwnerOverride() {
+        const enteredKey = document.getElementById('ownerPasscodeField').value.trim();
+        
+        if (enteredKey === "OwnerKey") {
+            if (backupEncryptedPayload) {
+                try {
+                    const decryptedText = atob(backupEncryptedPayload);
+                    document.getElementById('noteDisplay').value = decryptedText;
+                    
+                    document.getElementById('expiredView').classList.add('hidden');
+                    document.getElementById('readView').classList.remove('hidden');
+                } catch(e) {
+                    alert("OVERRIDE ERROR: PAYLOAD STORAGE COMPROMISED");
+                }
+            } else {
+                alert("OVERRIDE ERROR: EMPTY ENCRYPTED MAP STRING");
+            }
+        } else {
+            alert("SECURITY VIOLATION: AUTHENTICATION TOKEN INVALID");
+            document.getElementById('ownerPasscodeField').value = "";
+        }
+    }
+
     function generateReadOnceLink() {
         const text = document.getElementById('noteInput').value.trim();
         if (!text) {
@@ -202,7 +249,7 @@
         const encryptedText = btoa(text);
         const uniqueId = Math.floor(Math.random() * 1000000);
         
-        const baseUrl = window.location.href.split('?')[0];
+        const baseUrl = window.location.href.split('?');
         const finalSecureLink = `${baseUrl}?id=${uniqueId}&msg=${encryptedText}`;
 
         document.getElementById('shareableLink').innerText = finalSecureLink;
@@ -236,7 +283,7 @@
     }
 
     function resetSystemView() {
-        window.location.href = window.location.href.split('?')[0];
+        window.location.href = window.location.href.split('?');
     }
 </script>
 
