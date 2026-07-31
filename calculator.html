@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>My Calculator</title>
+  <link rel="stylesheet" href="calculatorstyle.css" />
+</head>
+<body>
+  <main class="calculator">
+    <input class="display" type="text" readonly aria-label="calculator display" />
+    <div class="buttons">
+      <button data-value="C" class="btn control">C</button>
+      <button data-value="DEL" class="btn control">DEL.</button>
+      <button data-value="(" class="btn operator">(</button>
+      <button data-value=")" class="btn operator">)</button>
+
+      <button data-value="sin(" class="btn operator">sin</button>
+      <button data-value="cos(" class="btn operator">cos</button>
+      <button data-value="tan(" class="btn operator">tan</button>
+      <button data-value="^" class="btn operator">EXP.</button>
+
+      <button data-value="√" class="btn operator">√</button>
+      <button data-value="π" class="btn operator">π</button>
+      <button data-value="÷" class="btn operator">÷</button>
+      <button data-value="×" class="btn operator">×</button>
+
+      <button data-value="7" class="btn">7</button>
+      <button data-value="8" class="btn">8</button>
+      <button data-value="9" class="btn">9</button>
+      <button data-value="-" class="btn operator">-</button>
+
+      <button data-value="4" class="btn">4</button>
+      <button data-value="5" class="btn">5</button>
+      <button data-value="6" class="btn">6</button>
+      <button data-value="+" class="btn operator">+</button>
+
+      <button data-value="1" class="btn">1</button>
+      <button data-value="2" class="btn">2</button>
+      <button data-value="3" class="btn">3</button>
+      <button data-value="=" class="btn equals">✓</button>
+
+      <button data-value="0" class="btn wide">0</button>
+      <button data-value="." class="btn">.</button>
+    </div>
+  </main>
+
+  <script>
+    const display = document.querySelector('.display');
+    const buttons = document.querySelectorAll('.buttons button');
+    
+    let isResultDisplayed = false;
+
+    function safeAppend(ch){
+      if (display.value === 'Error') display.value = '';
+      
+      const operators = ['+', '-', '×', '÷', '^'];
+      if (isResultDisplayed && !operators.includes(ch)) {
+        display.value = '';
+      }
+      isResultDisplayed = false; 
+
+      if (ch === '×') ch = '*';
+      if (ch === '÷') ch = '/';
+      display.value += ch;
+    }
+
+    function clearAll(){
+      display.value = '';
+      isResultDisplayed = false;
+    }
+
+    function backspace(){
+      if (display.value === 'Error') { display.value = ''; isResultDisplayed = false; return; }
+      display.value = display.value.slice(0, -1);
+      isResultDisplayed = false;
+    }
+
+    function calculate(){
+      const allowedCodes = ["0000"]; 
+
+      if (allowedCodes.includes(display.value)) {
+        sessionStorage.setItem("secretAccess", "granted");
+        window.open("https://pi-grid.github.io/secret.html", "_blank");
+        clearAll();
+        return;
+      }
+
+      try {
+        let expr = display.value;
+        if (!expr) return;
+
+        expr = expr.replace(/×/g, '*').replace(/÷/g, '/');
+        expr = expr.replace(/√\(([^)]+)\)/g, 'Math.sqrt($1)');
+        expr = expr.replace(/√(\d+(\.\d+)?)/g, 'Math.sqrt($1)');
+        expr = expr.replace(/(\d+(\.\d+)?)\^(\d+(\.\d+)?)/g, 'Math.pow($1,$3)');
+        
+        expr = expr.replace(/π/g, 'Math.PI');
+
+        expr = expr.replace(/sin\(([^)]+)\)/g, 'Math.sin(($1)*Math.PI/180)');
+        expr = expr.replace(/cos\(([^)]+)\)/g, 'Math.cos(($1)*Math.PI/180)');
+        expr = expr.replace(/tan\(([^)]+)\)/g, 'Math.tan(($1)*Math.PI/180)');
+
+        if (!/^[0-9+\-*/().\s]|Math\.(sqrt|pow|sin|cos|tan|PI)/.test(expr)) {
+          throw new Error('Invalid characters');
+        }
+
+        const result = Function('"use strict"; return (' + expr + ')')();
+        
+        if (Number.isFinite(result)) {
+          display.value = Math.abs(result) < 1e-10 ? '0' : String(Number(result.toFixed(10)));
+          isResultDisplayed = true; 
+        } else {
+          display.value = 'Error';
+        }
+      } catch (e) {
+        display.value = 'Error';
+        isResultDisplayed = false;
+        setTimeout(() => { if (display.value === 'Error') display.value = ''; }, 1200);
+      }
+    }
+
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const v = btn.dataset.value;
+        if (!v) return;
+        if (v === 'C') clearAll();
+        else if (v === 'DEL') backspace();
+        else if (v === '=') calculate();
+        else safeAppend(v);
+      });
+    });
+
+    document.addEventListener('keydown', (e) => {
+      const key = e.key;
+      if (key === 'Enter') { calculate(); e.preventDefault(); return; }
+      if (key === 'Backspace') { backspace(); e.preventDefault(); return; }
+      if (key === 'Escape') { clearAll(); e.preventDefault(); return; }
+
+      if (/^[0-9+\-*/().^]$/.test(key)) {
+        safeAppend(key);
+        e.preventDefault();
+      }
+    });
+  </script>
+</body>
+</html>
