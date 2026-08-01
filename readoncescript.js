@@ -78,6 +78,7 @@ function validateOwnerOverride() {
     }
 }
 
+// MODIFIED: Ab yeh function sirf link generate karega, auto-copy nahi karega
 function generateReadOnceLink() {
     const text = document.getElementById('noteInput').value.trim();
     if (!text) {
@@ -92,31 +93,63 @@ function generateReadOnceLink() {
     const finalSecureLink = `${cleanBaseUrl}?id=${uniqueId}&msg=${encryptedText}`;
 
     document.getElementById('shareableLink').innerText = finalSecureLink;
-    document.getElementById('resultBox').classList.remove('hidden');
     
+    // Status text aur Copy Button ko reset karne ke liye
+    const statusText = document.getElementById('copyStatusText');
+    const copyBtn = document.getElementById('copyBtn');
+    if (statusText) statusText.style.display = 'none';
+    if (copyBtn) copyBtn.innerText = "COPY LINK";
+
+    document.getElementById('resultBox').classList.remove('hidden');
+}
+
+// NEW: Yeh function tab chalega jab user "COPY LINK" button par click karega
+function copyLinkToClipboard() {
+    const linkText = document.getElementById("shareableLink").innerText;
+    const statusText = document.getElementById("copyStatusText");
+    const copyBtn = document.getElementById("copyBtn");
+
     if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(finalSecureLink)
+        navigator.clipboard.writeText(linkText)
             .then(() => {
-                document.getElementById('copyStatusText').innerText = "LINK GENERATED & COPIED TO CLIPBOARD";
+                showCopySuccess(statusText, copyBtn);
             })
             .catch(() => {
-                fallbackCopyAction(finalSecureLink);
+                fallbackCopyAction(linkText, statusText, copyBtn);
             });
     } else {
-        fallbackCopyAction(finalSecureLink);
+        fallbackCopyAction(linkText, statusText, copyBtn);
     }
 }
 
-function fallbackCopyAction(text) {
+// NEW: Copy hone ke baad UI update karne ke liye
+function showCopySuccess(statusText, copyBtn) {
+    if (statusText) {
+        statusText.innerText = "LINK COPIED TO CLIPBOARD";
+        statusText.style.display = "block";
+    }
+    if (copyBtn) copyBtn.innerText = "COPIED!";
+    
+    setTimeout(() => {
+        if (statusText) statusText.style.display = "none";
+        if (copyBtn) copyBtn.innerText = "COPY LINK";
+    }, 3000);
+}
+
+// MODIFIED: Fallback action ko naye structure ke hisaab se update kiya
+function fallbackCopyAction(text, statusText, copyBtn) {
     const tempTextArea = document.createElement("textarea");
     tempTextArea.value = text;
     document.body.appendChild(tempTextArea);
     tempTextArea.select();
     try {
         document.execCommand("copy");
-        document.getElementById('copyStatusText').innerText = "LINK GENERATED & COPIED TO CLIPBOARD";
+        showCopySuccess(statusText, copyBtn);
     } catch (err) {
-        document.getElementById('copyStatusText').innerText = "LINK GENERATED (MANUALLY COPY ABOVE)";
+        if (statusText) {
+            statusText.innerText = "ERROR: PLEASE COPY MANUALLY ABOVE";
+            statusText.style.display = "block";
+        }
     }
     document.body.removeChild(tempTextArea);
 }
