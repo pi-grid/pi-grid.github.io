@@ -7,6 +7,22 @@ const sendBtn = document.getElementById('sendBtn');
 const modeSelect = document.getElementById('generationMode');
 const secretKeyInput = document.getElementById('secretKey');
 
+// --- EXHAUSTIVE 18+ BANNED WORDS LIST ---
+const bannedWords = [
+    'nsfw', 'porn', 'sex', 'xvideos', 'hentai', 'xxx', 'erotic', 'sensual', 'adult', 'lust', 'sensuous',
+    'porno', 'pornography', 'cybersex', 'camshow', 'webcam', 'strip', 'striptease', 'nude', 'naked', 'nudity',
+    'intercourse', 'copulation', 'penetration', 'ejaculation', 'orgasm', 'blowjob', 'handjob', 
+    'cunnilingus', 'fellatio', 'analsex', 'sodomy', 'masturbate', 'masturbation', 'foreplay', 'fingering',
+    'pussy', 'dick', 'boobs', 'vagina', 'breast', 'breasts', 'penis', 'testicles', 'asshole', 'clitoris', 
+    'tits', 'titties', 'cock', 'vulva', 'scrotum', 'buttocks', 'booty', 'cleavage', 'nipple', 'nipples',
+    'arousal', 'arouse', 'aroused', 'aphrodisiac', 'horny', 'bDSM', 'fetish', 'kink', 'kinky', 'orgiastic', 
+    'orgy', 'dominatrix', 'bondage', 'sadism', 'masochism', 'erogenous', 'libido', 'voluptuous', 'seduce', 'seduction',
+    'rape', 'incest', 'molest', 'molestation', 'voyeur', 'voyeurism', 'exhibitionism', 'pedophile', 'bestiality'
+];
+
+// Context words jo 'climax' ke sath aane par use risky banate hain
+const riskyContextWords = ['video', 'image', 'photo', 'picture', 'scene', 'act', 'girl', 'boy', 'woman', 'man', 'generation', 'generate'];
+
 // Dropdown change behavior listener
 modeSelect.addEventListener('change', () => {
     if (modeSelect.value === 'text') {
@@ -45,7 +61,48 @@ async function processQuery() {
 
     if (!prompt) return;
 
-    // Security Check for Image & Video
+    // --- SMART 18+ SAFETY FILTER CHECK ---
+    const lowerPrompt = prompt.toLowerCase();
+    let isExplicit = false;
+
+    // 1. Check standard banned words list (using exact word boundary)
+    const hasBaseBannedWord = bannedWords.some(word => {
+        const regex = new RegExp(`\\b${word}\\b`, 'i');
+        return regex.test(lowerPrompt);
+    });
+
+    if (hasBaseBannedWord) {
+        isExplicit = true;
+    }
+
+    // 2. Smart Climax Context Checking
+    const hasClimax = /\bclimax\b/i.test(lowerPrompt);
+    if (hasClimax) {
+        // Agar prompt mein 'climax' ke sath koi base banned word pehle hi mil gaya (jaise "porn climax")
+        if (hasBaseBannedWord) {
+            isExplicit = true;
+        }
+        
+        // Agar standard word nahi mila, par koi risky word mil gaya (jaise "climax scene", "generate climax")
+        const hasRiskyContext = riskyContextWords.some(word => {
+            const regex = new RegExp(`\\b${word}\\b`, 'i');
+            return regex.test(lowerPrompt);
+        });
+
+        if (hasRiskyContext) {
+            isExplicit = true;
+        }
+    }
+
+    // Trigger Block Message if matched
+    if (isExplicit) {
+        appendMessage('System', '❌ Explicit content not allowed here…!!!');
+        userInput.value = '';
+        status.innerText = "Grid Online. Ready.";
+        return; // Local level block
+    }
+
+    // Security Check for Image & Video (Owner Only)
     if ((mode === 'image' || mode === 'video') && key !== 'OwnerKey') {
         appendMessage('System', '⚠️ ACCESS DENIED: Invalid Secret Key.');
         return;
@@ -64,7 +121,7 @@ async function processQuery() {
     }
 }
 
-// 1. Text Search Mode (Runs completely locally in browser)
+// 1. Text Search Mode
 async function generateText(prompt) {
     try {
         const output = await textGenerator(prompt, { max_new_tokens: 150, temperature: 0.7 });
@@ -75,7 +132,7 @@ async function generateText(prompt) {
     }
 }
 
-// 2. Image Mode (Uses an open-source cloud inference endpoint)
+// 2. Image Mode
 async function generateImage(prompt) {
     try {
         const response = await fetch("https://huggingface.co", {
@@ -92,7 +149,7 @@ async function generateImage(prompt) {
     }
 }
 
-// 3. Video Mode (Uses open-source continuous frame animation)
+// 3. Video Mode
 async function generateVideo(prompt) {
     try {
         const response = await fetch("https://huggingface.co", {
