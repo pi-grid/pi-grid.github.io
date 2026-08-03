@@ -24,40 +24,28 @@
         }
 
         /* --- 2. GLOBAL CONTAINER CARD --- */
-        .container, .card, .calculator, .ai-chat-container {
+        .ai-chat-container {
             text-align: center;
-            padding: 2.5rem;
+            padding: 2rem;
             border: 1px solid #10b981;
             border-radius: 12px;
             background-color: rgba(10, 25, 14, 0.85);
             box-shadow: 0 8px 32px 0 rgba(16, 185, 129, 0.15);
             backdrop-filter: blur(6px);
             width: 100%;
-            max-width: 450px; /* Standard single-card layout width */
+            max-width: 480px;
         }
 
         /* --- 3. HEADINGS & TEXT --- */
-        h1, h2, h3 {
+        h3 {
             color: #39ff14;
             text-shadow: 0 0 10px rgba(57, 255, 20, 0.4);
             letter-spacing: 1px;
             margin-bottom: 1rem;
         }
 
-        h1 { font-size: 2.8rem; }
-        h2 { font-size: 2rem; }
-
-        p {
-            color: #cbd5e1;
-            font-size: 1rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            line-height: 1.5;
-            margin-bottom: 1.5rem;
-        }
-
         /* --- 4. BUTTONS --- */
-        button, .btn {
+        button {
             background: rgba(16, 185, 129, 0.1);
             color: #39ff14;
             border: 1px solid #10b981;
@@ -69,22 +57,16 @@
             transition: all 0.3s ease;
             letter-spacing: 1px;
             text-transform: uppercase;
+            width: 100%;
         }
 
-        /* Button Hover State (Neon Glow Effect) */
-        button:hover, .btn:hover {
+        button:hover {
             background: #10b981;
             color: #020c04;
             box-shadow: 0 0 15px rgba(16, 185, 129, 0.6);
             transform: translateY(-2px);
         }
 
-        /* Button Click/Active State */
-        button:active, .btn:active {
-            transform: translateY(0);
-        }
-
-        /* Button Disabled State */
         button:disabled {
             background: rgba(16, 185, 129, 0.05);
             color: rgba(57, 255, 20, 0.3);
@@ -94,68 +76,39 @@
             box-shadow: none !important;
         }
 
-        /* --- 5. INPUT FIELDS & TEXTAREAS --- */
-        input[type="text"], input[type="number"], input[type="password"], textarea, select {
+        /* --- 5. INPUT FIELDS & SELECT --- */
+        input[type="text"], input[type="password"], select {
             width: 100%;
             background: rgba(2, 12, 4, 0.6);
             border: 1px solid rgba(16, 185, 129, 0.4);
             padding: 0.75rem;
             color: #e2e8f0;
-            font-size: 1.1rem;
+            font-size: 1rem;
             border-radius: 6px;
             outline: none;
             transition: all 0.3s ease;
             margin-bottom: 1rem;
         }
 
-        /* Input Focus State */
-        input:focus, textarea:focus, select:focus {
+        input:focus, select:focus {
             border-color: #39ff14;
             box-shadow: 0 0 10px rgba(57, 255, 20, 0.3);
         }
 
-        /* Input Disabled State */
-        input:disabled {
-            background: rgba(2, 12, 4, 0.3);
-            border-color: rgba(16, 185, 129, 0.1);
-            color: #666;
-        }
-
-        /* --- 6. LINKS --- */
-        a {
-            color: #39ff14;
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-
-        a:hover {
-            text-decoration: underline;
-            text-shadow: 0 0 5px rgba(57, 255, 20, 0.5);
-        }
-
-        /* --- 7. CHAT SPECIFIC LAYOUT --- */
+        /* --- 6. CHAT SPECIFIC LAYOUT --- */
         .chat-box {
-            height: 250px;
+            height: 280px;
             overflow-y: auto;
             border: 1px solid rgba(16, 185, 129, 0.3);
             border-radius: 6px;
             padding: 12px;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
             background: rgba(2, 12, 4, 0.8);
             text-align: left;
         }
 
-        /* Custom Scrollbar for Chat Box */
-        .chat-box::-webkit-scrollbar {
-            width: 6px;
-        }
-        .chat-box::-webkit-scrollbar-track {
-            background: rgba(2, 12, 4, 0.6);
-        }
-        .chat-box::-webkit-scrollbar-thumb {
-            background: #10b981;
-            border-radius: 3px;
-        }
+        .chat-box::-webkit-scrollbar { width: 6px; }
+        .chat-box::-webkit-scrollbar-thumb { background: #10b981; border-radius: 3px; }
 
         .status {
             font-size: 0.8rem;
@@ -166,80 +119,42 @@
             letter-spacing: 1px;
         }
 
-        .chat-msg {
-            margin-bottom: 10px;
-            font-size: 0.95rem;
-            line-height: 1.4;
-        }
-
-        .chat-msg strong {
-            color: #39ff14;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+        .chat-msg { margin-bottom: 12px; font-size: 0.95rem; line-height: 1.4; }
+        .chat-msg strong { color: #39ff14; text-transform: uppercase; }
+        
+        /* For generated media files */
+        .generated-media {
+            max-width: 100%;
+            border-radius: 6px;
+            border: 1px solid #10b981;
+            margin-top: 8px;
+            display: block;
         }
     </style>
 </head>
 <body>
 
-    <!-- Pi-Grid AI Container -->
     <div class="ai-chat-container">
         <h3>Pi-Grid AI</h3>
         <div id="status" class="status">Initializing Neural Grid...</div>
         <div id="chatBox" class="chat-box"></div>
         
-        <input type="text" id="userInput" placeholder="Input bypass command..." disabled />
-        <button id="sendBtn" style="width: 100%;" onclick="generateText()" disabled>Execute</button>
+        <!-- Task Selection -->
+        <select id="generationMode">
+            <option value="text">Search / Text Generation (Free)</option>
+            <option value="image">Image Generation (Requires Key)</option>
+            <option value="video">Video Generation (Requires Key)</option>
+        </select>
+
+        <!-- Secret Key Field (Hidden by default, shown for image/video) -->
+        <input type="password" id="secretKey" placeholder="Enter Secret OwnerKey" style="display: none;" />
+
+        <!-- User Prompt -->
+        <input type="text" id="userInput" placeholder="Input prompt/command..." disabled />
+        <button id="sendBtn" disabled>Execute</button>
     </div>
 
-    <script type="module">
-        import { pipeline } from 'https://jsdelivr.net';
-
-        let generator;
-        const status = document.getElementById('status');
-        const userInput = document.getElementById('userInput');
-        const sendBtn = document.getElementById('sendBtn');
-
-        async function initAI() {
-            try {
-                // Instantiates a light 0.5B model completely in-browser
-                generator = await pipeline('text-generation', 'Xenova/Qwen1.5-0.5B-Chat');
-                status.innerText = "Grid Online. No Restrictions.";
-                userInput.disabled = false;
-                sendBtn.disabled = false;
-            } catch (err) {
-                status.innerText = "Grid Error. Verify WebGPU/WASM configuration.";
-                console.error(err);
-            }
-        }
-
-        window.generateText = async function() {
-            const text = userInput.value;
-            if (!text) return;
-
-            appendMessage('User', text);
-            userInput.value = '';
-            status.innerText = "Processing mainframe query...";
-
-            try {
-                const output = await generator(text, { 
-                    max_new_tokens: 150,
-                    temperature: 0.7
-                });
-                appendMessage('Pi-Grid', output.generated_text);
-                status.innerText = "Grid Online. Ready.";
-            } catch (error) {
-                appendMessage('System', 'Execution interrupted during runtime.');
-                status.innerText = "Grid Idle.";
-            }
-        }
-
-        function appendMessage(sender, text) {
-            const chatBox = document.getElementById('chatBox');
-            chatBox.innerHTML += `<div class="chat-msg"><strong>[${sender}]:</strong> ${text}</div>`;
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-
-        initAI();
-    </script>
+    <!-- Linking external JS file as module -->
+    <script type="module" src="aiscript.js"></script>
 </body>
 </html>
