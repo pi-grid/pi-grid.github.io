@@ -21,7 +21,6 @@ userInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') processQuery();
 });
 
-// Force Instant Unlock Function (Bina kisi network waiting ke)
 function forceInstantUnlock() {
     status.innerText = "Grid Online. Ready.";
     userInput.disabled = false;
@@ -85,14 +84,32 @@ async function processQuery() {
     }
 }
 
+// 1. Fixed High-Stability Text Generation (POST Stream Endpoint)
 async function generateText(prompt) {
     try {
-        const response = await fetch(`https://pollinations.ai{encodeURIComponent(prompt)}?model=llama`);
+        const response = await fetch("https://text.pollinations.ai/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                messages: [{ role: "user", content: prompt }]
+            })
+        });
+        
+        if (!response.ok) throw new Error();
         const aiReply = await response.text();
+        
         appendMessage('Pi-Grid AI', aiReply);
         status.innerText = "Grid Online. Ready.";
     } catch (e) {
-        appendMessage('Pi-Grid AI', 'Processing error. Please retry.');
+        appendMessage('Pi-Grid AI', 'Mainframe bypass active. Retrying link dynamically...');
+        // Backup link fallback agar POST request bhi network face kare
+        try {
+            const fallbackResponse = await fetch(`https://pollinations.ai{encodeURIComponent(prompt)}`);
+            const fallbackReply = await fallbackResponse.text();
+            appendMessage('Pi-Grid AI', fallbackReply);
+        } catch (err) {
+            appendMessage('Pi-Grid AI', 'Network route jam. Please re-execute script.');
+        }
         status.innerText = "Grid Online. Ready.";
     }
 }
@@ -139,5 +156,4 @@ function appendMedia(sender, url, type) {
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-// Initial execution
 forceInstantUnlock();
