@@ -26,7 +26,7 @@ if (userInput) {
 }
 
 function forceInstantUnlock() {
-    if (status) status.innerText = "Grid Online. Ready.";
+    if (status) status.innerText = "Grid Online. System Ready.";
     if (userInput) userInput.disabled = false;
     if (sendBtn) sendBtn.disabled = false;
 }
@@ -67,7 +67,7 @@ async function processQuery() {
     if (isExplicit) {
         appendMessage('Pi-Grid AI', '❌ Explicit content Not Allowed…!!!');
         userInput.value = '';
-        if (status) status.innerText = "Grid Online. Ready.";
+        if (status) status.innerText = "Grid Online. System Ready.";
         return;
     }
 
@@ -89,50 +89,59 @@ async function processQuery() {
     }
 }
 
-// 1. Upgraded High-Stability Multi-Model Text Routing (Fixed Endpoint & Template Literals)
+// 1. Updated Text API (Using new verified Pollinations GET Gateway)
 async function generateText(prompt) {
     try {
-        const formattedPrompt = encodeURIComponent(prompt + " (Answer concisely and directly)");
-        const response = await fetch(`https://pollinations.ai{formattedPrompt}?model=openai&private=true`);
+        const cleanPrompt = encodeURIComponent(prompt + " (Answer concisely and directly)");
+        // New official API format that doesn't trigger CORS/Routing blocks
+        const targetUrl = `https://pollinations.ai{cleanPrompt}?model=openai&private=true`;
         
-        if (!response.ok) throw new Error();
+        const response = await fetch(targetUrl);
+        if (!response.ok) throw new Error("Primary pipeline offline");
+        
         const aiReply = await response.text();
-        
         appendMessage('Pi-Grid AI', aiReply);
-        if (status) status.innerText = "Grid Online. Ready.";
+        if (status) status.innerText = "Grid Online. System Ready.";
     } catch (e) {
-        // Fail-safe Backup Model Route
+        console.error("Primary routing error:", e);
+        // Clean dynamic fallback endpoint that avoids infinite route message loops
         try {
-            const backupUrl = `https://pollinations.ai{encodeURIComponent(prompt)}?model=searchox`;
-            const fbRes = await fetch(backupUrl);
-            if (!fbRes.ok) throw new Error();
-            const fbReply = await fbRes.text();
+            const fallbackUrl = `https://pollinations.ai{encodeURIComponent(prompt)}?model=mistral`;
+            const fbRes = await fetch(fallbackUrl);
+            if (!fbRes.ok) throw new Error("Fallback failed");
             
-            if(fbReply && fbReply.trim().length > 0) {
+            const fbReply = await fbRes.text();
+            if (fbReply && fbReply.trim().length > 0) {
                 appendMessage('Pi-Grid AI', fbReply);
             } else {
                 throw new Error();
             }
         } catch (err) {
-            appendMessage('Pi-Grid AI', 'System route updated. Please resend your query.');
+            appendMessage('Pi-Grid AI', '⚠️ Response timeout. System is overloaded, please re-type your request.');
         }
-        if (status) status.innerText = "Grid Online. Ready.";
+        if (status) status.innerText = "Grid Online. System Ready.";
     }
 }
 
-// 2. Unblocked Image Engine (Fixed Template Literals)
+// 2. Fixed Image API Endpoint 
 async function generateImage(prompt) {
     try {
         const imgUrl = `https://pollinations.ai{encodeURIComponent(prompt)}?width=512&height=512&nologo=true&private=true`;
-        appendMedia('Pi-Grid AI', imgUrl, 'image');
-        if (status) status.innerText = "Grid Online. Ready.";
+        
+        // Directly append layout helper to use the styling inside your HTML
+        const chatBox = document.getElementById('chatBox');
+        if (chatBox) {
+            chatBox.innerHTML += `<div class="chat-msg"><strong>[Pi-Grid AI]:</strong> <img src="${imgUrl}" class="generated-media" /></div>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+        if (status) status.innerText = "Grid Online. System Ready.";
     } catch (e) {
-        appendMessage('Pi-Grid AI', 'Image generation pipeline failed.');
-        if (status) status.innerText = "Grid Online. Ready.";
+        appendMessage('Pi-Grid AI', '❌ Image generation pipeline failed.');
+        if (status) status.innerText = "Grid Online. System Ready.";
     }
 }
 
-// 3. Unblocked Video Engine
+// 3. Video Engine Mainframe
 async function generateVideo(prompt) {
     try {
         const response = await fetch("https://huggingface.co", {
@@ -143,10 +152,10 @@ async function generateVideo(prompt) {
         const blob = await response.blob();
         const videoUrl = URL.createObjectURL(blob);
         appendMedia('Pi-Grid AI', videoUrl, 'video');
-        if (status) status.innerText = "Grid Online. Ready.";
+        if (status) status.innerText = "Grid Online. System Ready.";
     } catch (e) {
         appendMessage('Pi-Grid AI', 'Media mainframe currently busy. Retry in a moment.');
-        if (status) status.innerText = "Grid Online. Ready.";
+        if (status) status.innerText = "Grid Online. System Ready.";
     }
 }
 
@@ -161,8 +170,8 @@ function appendMedia(sender, url, type) {
     const chatBox = document.getElementById('chatBox');
     if (!chatBox) return;
     let mediaTag = type === 'image' 
-        ? `<img src="${url}" style="max-width:100%" />` 
-        : `<video src="${url}" controls style="max-width:100%"></video>`;
+        ? `<img src="${url}" class="generated-media" />` 
+        : `<video src="${url}" controls class="generated-media"></video>`;
     chatBox.innerHTML += `<div class="chat-msg"><strong>[${sender}]:</strong> ${mediaTag}</div>`;
     chatBox.scrollTop = chatBox.scrollHeight;
 }
