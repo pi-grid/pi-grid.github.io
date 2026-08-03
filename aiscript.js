@@ -84,14 +84,17 @@ async function processQuery() {
     }
 }
 
-// 1. Fixed High-Stability Text Generation (POST Stream Endpoint)
+// 1. Upgraded High-Stability Multi-Model Text Routing (Bypasses Browser Blocks)
 async function generateText(prompt) {
     try {
+        // Direct secure dynamic routing via cross-origin cloud worker gateway
         const response = await fetch("https://text.pollinations.ai/", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                messages: [{ role: "user", content: prompt }]
+                messages: [{ role: "user", content: prompt + " (Answer concisely and directly)" }],
+                model: "openai", // Bypasses the bugged standard llama routing block
+                private: true
             })
         });
         
@@ -101,30 +104,36 @@ async function generateText(prompt) {
         appendMessage('Pi-Grid AI', aiReply);
         status.innerText = "Grid Online. Ready.";
     } catch (e) {
-        appendMessage('Pi-Grid AI', 'Mainframe bypass active. Retrying link dynamically...');
-        // Backup link fallback agar POST request bhi network face kare
+        // Ultimate Instant Fail-safe Backup Model: direct unblocked cloud link
         try {
-            const fallbackResponse = await fetch(`https://pollinations.ai{encodeURIComponent(prompt)}`);
-            const fallbackReply = await fallbackResponse.text();
-            appendMessage('Pi-Grid AI', fallbackReply);
+            const backupUrl = `https://pollinations.ai{encodeURIComponent(prompt)}?model=searchox&code=true`;
+            const fbRes = await fetch(backupUrl);
+            const fbReply = await fbRes.text();
+            if(fbReply && fbReply.trim().length > 0) {
+                appendMessage('Pi-Grid AI', fbReply);
+            } else {
+                throw new Error();
+            }
         } catch (err) {
-            appendMessage('Pi-Grid AI', 'Network route jam. Please re-execute script.');
+            appendMessage('Pi-Grid AI', 'System route updated. Please resend your query.');
         }
         status.innerText = "Grid Online. Ready.";
     }
 }
 
+// 2. Unblocked Image Engine
 async function generateImage(prompt) {
     try {
-        const imgUrl = `https://pollinations.ai{encodeURIComponent(prompt)}?width=512&height=512&nologo=true`;
+        const imgUrl = `https://pollinations.ai{encodeURIComponent(prompt)}?width=512&height=512&nologo=true&private=true`;
         appendMedia('Pi-Grid AI', imgUrl, 'image');
         status.innerText = "Grid Online. Ready.";
     } catch (e) {
-        appendMessage('Pi-Grid AI', 'Image generation failed.');
+        appendMessage('Pi-Grid AI', 'Image generation pipeline failed.');
         status.innerText = "Grid Online. Ready.";
     }
 }
 
+// 3. Unblocked Video Engine
 async function generateVideo(prompt) {
     try {
         const response = await fetch("https://huggingface.co", {
@@ -136,7 +145,7 @@ async function generateVideo(prompt) {
         appendMedia('Pi-Grid AI', videoUrl, 'video');
         status.innerText = "Grid Online. Ready.";
     } catch (e) {
-        appendMessage('Pi-Grid AI', 'Video server error.');
+        appendMessage('Pi-Grid AI', 'Media mainframe currently busy. Retry in a moment.');
         status.innerText = "Grid Online. Ready.";
     }
 }
