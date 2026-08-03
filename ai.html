@@ -122,7 +122,6 @@
         .chat-msg { margin-bottom: 12px; font-size: 0.95rem; line-height: 1.4; }
         .chat-msg strong { color: #39ff14; text-transform: uppercase; }
         
-        /* For generated media files */
         .generated-media {
             max-width: 100%;
             border-radius: 6px;
@@ -136,25 +135,22 @@
 
     <div class="ai-chat-container">
         <h3>Pi-Grid AI</h3>
-        <div id="status" class="status">Initializing Neural Grid...</div>
+        <!-- Note: Default status direct ready par hai taaki text search lock na ho -->
+        <div id="status" class="status">Grid Online. System Ready.</div>
         <div id="chatBox" class="chat-box"></div>
         
-        <!-- Task Selection -->
         <select id="generationMode">
             <option value="text">Search / Text Generation (Free)</option>
             <option value="image">Image Generation (Requires Key)</option>
             <option value="video">Video Generation (Requires Key)</option>
         </select>
 
-        <!-- Secret Key Field (Hidden by default, shown for image/video) -->
-        <input type="password" id="secretKey" placeholder="Enter Secret OwnerKey" style="display: none;" />
-
-        <!-- User Prompt -->
-        <input type="text" id="userInput" placeholder="Input prompt/command..." disabled />
-        <button id="sendBtn" disabled>Execute</button>
+        <input type="password" id="secretKey" placeholder="Enter Secret Key" style="display: none;" />
+        <input type="text" id="userInput" placeholder="Input prompt/command..." />
+        <button id="sendBtn">Execute</button>
     </div>
 
-    <!-- Linking external JS file as module -->
-    <script type="module" src="aiscript.js"></script>
+    <!-- Script linking -->
+    <script src="aiscript.js"></script>
 </body>
 </html>
