@@ -13,10 +13,9 @@ const overlayTitle = document.getElementById("overlay-title");
 // Game State Engine Variables
 let score = 0;
 let wave = 1;
-let isGameStarted = false; // Isko use karke loop ko roka jata hai
+let isGameStarted = false; 
 let isPaused = false;
 let isGameOver = false;
-let animationFrameId = null;
 
 // Paddle Configuration
 const paddleHeight = 10;
@@ -25,13 +24,15 @@ let paddleX = (canvas.width - paddleWidth) / 2;
 let rightPressed = false;
 let leftPressed = false;
 
-// Ball Configuration
+// Ball Configuration (SPEED REDUCED HERE)
 const ballRadius = 6;
 let x = canvas.width / 2;
 let y = canvas.height - 30;
-let dx = 3;
-let dy = -3;
-const baseSpeed = 3.5;
+
+// Shuruati speed ko 3.5 se kam karke 2 kar diya hai (Bohot smooth chalega)
+const baseSpeed = 2; 
+let dx = baseSpeed;
+let dy = -baseSpeed;
 
 // Brick Grid Configuration
 const brickRowCount = 3;
@@ -55,7 +56,7 @@ function initBricks() {
     }
 }
 
-// Global Event Listeners - Dynamic tracking method updates
+// Global Event Listeners
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
 document.addEventListener("mousemove", mouseMoveHandler, false);
@@ -64,7 +65,7 @@ document.addEventListener("mousemove", mouseMoveHandler, false);
 canvas.addEventListener("touchmove", (e) => {
     e.preventDefault();
     const rect = canvas.getBoundingClientRect();
-    const touchX = e.touches[0].clientX - rect.left;
+    const touchX = e.touches.clientX - rect.left;
     if (touchX > 0 && touchX < canvas.width) {
         paddleX = touchX - paddleWidth / 2;
     }
@@ -81,11 +82,9 @@ function keyUpHandler(e) {
     else if (e.key === "Left" || e.key === "ArrowLeft") leftPressed = false;
 }
 
-// Bouncer super-responsive calculations engine
 function mouseMoveHandler(e) {
     const rect = canvas.getBoundingClientRect();
     const relativeX = e.clientX - rect.left;
-    // Agar cursor canvas bound ke andar hai tabhi update karein
     if (relativeX > 0 && relativeX < canvas.width) {
         paddleX = relativeX - paddleWidth / 2;
     }
@@ -113,8 +112,11 @@ function collisionDetection() {
         waveText.innerText = wave;
         initBricks();
         resetBallAndPaddle();
-        dx = dx > 0 ? baseSpeed + (wave * 0.4) : -(baseSpeed + (wave * 0.4));
-        dy = dy > 0 ? baseSpeed + (wave * 0.4) : -(baseSpeed + (wave * 0.4));
+        
+        // Naye wave par speed sirf 0.15 badhegi (Pehle 0.4 badh rahi thi)
+        const speedIncrement = wave * 0.15;
+        dx = dx > 0 ? baseSpeed + speedIncrement : -(baseSpeed + speedIncrement);
+        dy = dy > 0 ? baseSpeed + speedIncrement : -(baseSpeed + speedIncrement);
     }
 }
 
@@ -158,7 +160,6 @@ function drawBricks() {
     }
 }
 
-// Dynamic State Logic Controller
 function handleStartPauseLogic() {
     if (isGameOver) return;
 
@@ -199,7 +200,6 @@ function restartGame() {
     resetBallAndPaddle();
 }
 
-// Click Listeners Binding
 pauseBtn.addEventListener("click", handleStartPauseLogic);
 okayBtn.addEventListener("click", () => {
     if (isGameOver) {
@@ -210,17 +210,13 @@ okayBtn.addEventListener("click", () => {
 });
 resetBtn.addEventListener("click", restartGame);
 
-// Main Operational Framework Loop
 function gameLoop() {
-    // Canvas background clean render
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // Draw static elements (Yeh freeze state me bhi dikhte rahenge)
     drawBricks();
     drawPaddle();
     drawBall();
 
-    // Agar game start nahi hua hai, to canvas par overlay alert render karein
     if (!isGameStarted) {
         ctx.fillStyle = "rgba(2, 12, 4, 0.8)";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -229,7 +225,6 @@ function gameLoop() {
         ctx.textAlign = "center";
         ctx.fillText("CLICK THE START BUTTON TO PLAY", canvas.width / 2, canvas.height / 2);
     } 
-    // Agar start ho gaya hai aur pause nahi hai, to ball movement update karein
     else if (!isPaused && !isGameOver) {
         collisionDetection();
 
@@ -247,11 +242,11 @@ function gameLoop() {
             }
         }
 
-        // Keyboard triggers standard fallback movement calculations
+        // Paddle response speed control fallback
         if (rightPressed && paddleX < canvas.width - paddleWidth) {
-            paddleX += 7;
+            paddleX += 5;
         } else if (leftPressed && paddleX > 0) {
-            paddleX -= 7;
+            paddleX -= 5;
         }
 
         x += dx;
@@ -261,6 +256,5 @@ function gameLoop() {
     requestAnimationFrame(gameLoop);
 }
 
-// Game init
 initBricks();
 gameLoop();
