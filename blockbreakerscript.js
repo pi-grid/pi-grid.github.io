@@ -13,6 +13,7 @@ const overlayTitle = document.getElementById("overlay-title");
 // Game State Variables
 let score = 0;
 let wave = 1;
+let isGameStarted = false; // Game start check system
 let isPaused = false;
 let isGameOver = false;
 let animationFrameId = null;
@@ -32,7 +33,7 @@ let dx = 3;
 let dy = -3;
 const baseSpeed = 3.5;
 
-// Brick Grid Configuration (Optimized to layout scaling perfectly inside 370px width boundary limits)
+// Brick Grid Configuration
 const brickRowCount = 3;
 const brickColumnCount = 5;
 const brickWidth = 60;
@@ -42,10 +43,8 @@ const brickOffsetTop = 25;
 const brickOffsetLeft = 20;
 let bricks = [];
 
-// Matrix Theme Palette
 const brickColors = ["#39ff14", "#10b981", "#059669"];
 
-// Initialize/Generate Bricks for Infinite Loop
 function initBricks() {
     bricks = [];
     for (let c = 0; c < brickColumnCount; c++) {
@@ -59,11 +58,15 @@ function initBricks() {
 // Keyboard Event Listeners
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
+// MOUSE MOVEMENT LISTENER (Bouncer control karne ke liye)
+document.addEventListener("mousemove", mouseMoveHandler, false);
+// TOUCH DEVICE LISTENER (Mobile par smooth control ke liye)
+canvas.addEventListener("touchmove", touchMoveHandler, { passive: false });
 
 function keyDownHandler(e) {
     if (e.key === "Right" || e.key === "ArrowRight") rightPressed = true;
     else if (e.key === "Left" || e.key === "ArrowLeft") leftPressed = true;
-    else if (e.key === " " || e.key === "p" || e.key === "P") togglePause();
+    else if (e.key === " " || e.key === "p" || e.key === "P") handleStartPauseLogic();
 }
 
 function keyUpHandler(e) {
@@ -71,7 +74,23 @@ function keyUpHandler(e) {
     else if (e.key === "Left" || e.key === "ArrowLeft") leftPressed = false;
 }
 
-// Brick Collision Detector
+// Mouse movement core control calculator
+function mouseMoveHandler(e) {
+    const relativeX = e.clientX - canvas.getBoundingClientRect().left;
+    if (relativeX > 0 && relativeX < canvas.width) {
+        paddleX = relativeX - paddleWidth / 2;
+    }
+}
+
+// Touch swipe calculation platform
+function touchMoveHandler(e) {
+    e.preventDefault(); // Screen scroll hone se rokne ke liye
+    const relativeX = e.touches[0].clientX - canvas.getBoundingClientRect().left;
+    if (relativeX > 0 && relativeX < canvas.width) {
+        paddleX = relativeX - paddleWidth / 2;
+    }
+}
+
 function collisionDetection() {
     let activeBricks = 0;
     for (let c = 0; c < brickColumnCount; c++) {
@@ -89,7 +108,6 @@ function collisionDetection() {
         }
     }
 
-    // INFINITE LOOP ENGINE
     if (activeBricks === 0) {
         wave++;
         waveText.innerText = wave;
@@ -106,11 +124,10 @@ function resetBallAndPaddle() {
     paddleX = (canvas.width - paddleWidth) / 2;
 }
 
-// Drawing Functions using Matrix Theme Assets
 function drawBall() {
     ctx.beginPath();
     ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
-    ctx.fillStyle = "#39ff14"; // Neon Green Ball
+    ctx.fillStyle = "#39ff14";
     ctx.fill();
     ctx.closePath();
 }
@@ -118,7 +135,7 @@ function drawBall() {
 function drawPaddle() {
     ctx.beginPath();
     ctx.rect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
-    ctx.fillStyle = "#10b981"; // Theme Emerald Paddle
+    ctx.fillStyle = "#10b981";
     ctx.fill();
     ctx.closePath();
 }
@@ -141,8 +158,30 @@ function drawBricks() {
     }
 }
 
-// Core Game Loop
+// Welcome Screen Text Renderer
+function drawWelcomeScreen() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawBricks();
+    drawPaddle();
+    drawBall();
+    
+    // Welcome text styling matrix neon overlay
+    ctx.fillStyle = "rgba(2, 12, 4, 0.75)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    ctx.font = "bold 16px -apple-system, BlinkMacSystemFont, Arial";
+    ctx.fillStyle = "#39ff14";
+    ctx.textAlign = "center";
+    ctx.fillText("CLICK START TO PLAY", canvas.width / 2, canvas.height / 2 + 5);
+}
+
+// Core Engine Loop
 function draw() {
+    if (!isGameStarted) {
+        drawWelcomeScreen();
+        return;
+    }
+
     if (isPaused || isGameOver) return;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -178,18 +217,26 @@ function draw() {
     animationFrameId = requestAnimationFrame(draw);
 }
 
-// Pause Menu Controls
-function togglePause() {
+// Start & Pause Trigger controller combined engine
+function handleStartPauseLogic() {
     if (isGameOver) return;
-    
-    isPaused = !isPaused;
-    if (isPaused) {
-        cancelAnimationFrame(animationFrameId);
-        overlayTitle.innerText = "GAME PAUSED";
-        menuOverlay.style.display = "flex";
-    } else {
-        menuOverlay.style.display = "none";
+
+    if (!isGameStarted) {
+        // Shuru me START dabane par game chalu hoga
+        isGameStarted = true;
+        pauseBtn.innerText = "PAUSE";
         draw();
+    } else {
+        // Baad me dabane par PAUSE/RESUME hoga
+        isPaused = !isPaused;
+        if (isPaused) {
+            cancelAnimationFrame(animationFrameId);
+            overlayTitle.innerText = "GAME PAUSED";
+            menuOverlay.style.display = "flex";
+        } else {
+            menuOverlay.style.display = "none";
+            draw();
+        }
     }
 }
 
@@ -206,11 +253,12 @@ function restartGame() {
     wave = 1;
     dx = baseSpeed;
     dy = -baseSpeed;
+    isGameStarted = false; // Reset to welcome state
     isPaused = false;
     isGameOver = false;
     scoreText.innerText = score;
     waveText.innerText = wave;
-    okayBtn.innerText = "OKAY / RESUME";
+    pauseBtn.innerText = "START";
     menuOverlay.style.display = "none";
     initBricks();
     resetBallAndPaddle();
@@ -218,17 +266,17 @@ function restartGame() {
     draw();
 }
 
-// Button Event Listeners
-pauseBtn.addEventListener("click", togglePause);
+// Button Events
+pauseBtn.addEventListener("click", handleStartPauseLogic);
 okayBtn.addEventListener("click", () => {
     if (isGameOver) {
         restartGame();
     } else {
-        togglePause();
+        handleStartPauseLogic(); // Acts as Okay/Resume close trigger
     }
 });
 resetBtn.addEventListener("click", restartGame);
 
-// Start Game Initialization
+// Initial setup rendering system
 initBricks();
 draw();
