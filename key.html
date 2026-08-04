@@ -133,55 +133,88 @@
             <div id="hint-text" class="hint-text">Tip: Use 8+ characters with mixed letters, numbers, and symbols.</div>
         </div>
     </div>
+<script>
+    const passwordInput = document.getElementById('password');
+const meterFill = document.getElementById('meter-fill');
+const strengthText = document.getElementById('strength-text');
+const hintText = document.getElementById('hint-text');
 
-    <script>
-        const passwordInput = document.getElementById('password');
-        const meterFill = document.getElementById('meter-fill');
-        const strengthText = document.getElementById('strength-text');
+const levels = [
+    { width: '0%',  color: 'transparent', text: 'Too weak ❌' },
+    { width: '25%', color: '#ef4444', text: 'Weak ⚠️' },
+    { width: '50%', color: '#f59e0b', text: 'Fair 👍' },
+    { width: '75%', color: '#eab308', text: 'Good 👌' },
+    { width: '100%', color: '#39ff14', text: 'Strong 💪' }
+];
 
-        // Sabhi badhte hue scores ke liye designs aur texts
-        const levels = [
-            { width: '0%',  color: 'transparent', text: 'Too weak ❌' },
-            { width: '25%', color: '#ef4444', text: 'Weak ⚠️' },
-            { width: '50%', color: '#f59e0b', text: 'Fair 🟡' },
-            { width: '75%', color: '#eab308', text: 'Good 🟢' },
-            { width: '100%', color: '#39ff14', text: 'Strong 💪' }
-        ];
+// Yahan maine '123' daal diya hai taaki koi bhi 'word123' banaye toh block ho jaye
+const blacklistedWords = ['password', '123', 'qwerty', 'admin', 'welcome', '@', '@12', '987' ,'123456', 'admin', '12345678', '123456789', '12345', 
+  'password', 'qwerty', '111111', 'admin123', 'iloveyou', 
+  '1234567', '1234', '1234567890', '000000', 'welcome', 
+  'password123', 'root', 'user', 'unknown', 'secret', 
+  '123123', '666666', '888888', '999999', '1234567890123', 
+  '1111', '123456789012', 'abc123', 'superman', 'football', 
+  'monkey', 'charlie', 'letmein', 'shadow', 'dragon', 
+  'ashley', 'jessica', 'michael', 'daniel', 'andrew', 
+  'matthew', 'princess', 'hunter', 'jordan', 'justin', 
+  'robert', 'thomas', 'joseph', 'christopher', 'william', 
+  'david', 'anthony', 'rebecca', 'amanda', 'stephanie', 
+  'jennifer', 'nicole', 'elizabeth', 'samantha', 'megan', 
+  'qwertyuiop', 'asdfghjkl', 'zxcvbnm', 'querty', 'keyboard', 
+  'football1', 'soccer', 'baseball', 'basketball', 'hockey', 
+  'liverpool', 'chelsea', 'arsenal', 'realmadrid', 'barcelona', 
+  'pokemon', 'batman', 'matrix', 'starwars', 'avengers', 
+  'summer', 'spring', 'winter', 'autumn', 'sunshine', 
+  'coffee', 'chocolate', 'cookie', 'pizza', 'banana', 
+  'google', 'microsoft', 'apple123', 'facebook', 'netflix', 
+  'maruti', 'reliance', 'jio123', 'namaste', 'krishna'];
 
-        // Commonly guessed weak patterns directly blocked inside script
-        const commonWeakPasswords = ['password', 'password123', 'p@ssword123', '12345678', 'qwertyuiop', 'admin123'];
+passwordInput.addEventListener('input', () => {
+    const val = passwordInput.value;
+    const lowerVal = val.toLowerCase();
+    let score = 0;
+    let isBlacklisted = false;
 
-        passwordInput.addEventListener('input', () => {
-            const val = passwordInput.value;
-            let score = 0;
+    if (val.length === 0) {
+        meterFill.style.width = levels[0].width;
+        meterFill.style.backgroundColor = levels[0].color;
+        strengthText.innerText = levels[0].text;
+        hintText.innerText = "Tip: Use 8+ characters with mixed letters, numbers, and symbols.";
+        hintText.style.color = "#cbd5e1";
+        return;
+    }
 
-            if (val.length === 0) {
-                meterFill.style.width = levels[0].width;
-                strengthText.innerText = levels[0].text;
-                return;
-            }
+    // 1. Core Rule Calculations
+    if (val.length >= 8) score++;
+    if (/[a-z]/.test(val) && /[A-Z]/.test(val)) score++;
+    if (/\d/.test(val)) score++;
+    if (/[^A-Za-z0-9]/.test(val)) score++;
 
-            // Rule 1: Length check (Kam se kam 8 letters)
-            if (val.length >= 8) score++;
-            // Rule 2: Upper and Lower case letters mixture
-            if (/[a-z]/.test(val) && /[A-Z]/.test(val)) score++;
-            // Rule 3: Numbers included
-            if (/\d/.test(val)) score++;
-            // Rule 4: Special Characters symbols included (!@#$ etc.)
-            if (/[^A-Za-z0-9]/.test(val)) score++;
+    // 2. Smart Scanning: Checks if password contains '123' or common words
+    for (let word of blacklistedWords) {
+        if (lowerVal.includes(word)) {
+            isBlacklisted = true;
+            break;
+        }
+    }
+    
+    // 3. Apply Penalties & Explanations
+    if (isBlacklisted) {
+        score = Math.min(score, 0); 
+        hintText.innerText = "⚠️ Warning: Contains a highly predictable phrase or common sequence like '123'.";
+        hintText.style.color = "#ef4444"; 
+    } else {
+        hintText.innerText = "Tip: Use 8+ characters with mixed letters, numbers, and symbols.";
+        hintText.style.color = "#cbd5e1";
+    }
 
-            // SECURITY FIX: Agar password upar diye gaye common list me match ho gaya toh forcefully zero score milega
-            if (commonWeakPasswords.includes(val.toLowerCase())) {
-                score = 1; // Direct failure down to weak state
-            }
-
-            // UI parameters real-time update
-            const currentLevel = levels[score];
-            meterFill.style.width = currentLevel.width;
-            meterFill.style.backgroundColor = currentLevel.color;
-            meterFill.style.boxShadow = `0 0 12px ${currentLevel.color}`;
-            strengthText.innerText = currentLevel.text;
-        });
-    </script>
+    // 4. Render Updates to UI
+    const currentLevel = levels[score];
+    meterFill.style.width = currentLevel.width;
+    meterFill.style.backgroundColor = currentLevel.color;
+    meterFill.style.boxShadow = `0 0 12px ${currentLevel.color}`;
+    strengthText.innerText = currentLevel.text;
+});
+</script>
 </body>
 </html>
