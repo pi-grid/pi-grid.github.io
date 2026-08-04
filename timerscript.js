@@ -11,7 +11,7 @@ const inputHours = document.getElementById('input-hours');
 const inputMinutes = document.getElementById('input-minutes');
 const inputSeconds = document.getElementById('input-seconds');
 
-// Infinite days layout config auto jump logic
+// Infinite days auto focus engine tracker
 function validateAndJumpDays(currentField, nextFieldId) {
     if (currentField.value.length === 2) {
         const nextTarget = document.getElementById(nextFieldId);
@@ -19,7 +19,7 @@ function validateAndJumpDays(currentField, nextFieldId) {
     }
 }
 
-// Hours dynamic limiter system cap to max 23
+// Hours dynamic tracking logic (Cap to max 23)
 function validateAndJumpHours(currentField, nextFieldId) {
     let val = parseInt(currentField.value);
     if (val > 23) currentField.value = 23;
@@ -34,7 +34,7 @@ function validateAndJumpHours(currentField, nextFieldId) {
     }
 }
 
-// Minutes dynamic limiter system cap to max 59
+// Minutes dynamic tracking logic (Cap to max 59)
 function validateAndJumpMinutes(currentField, nextFieldId) {
     let val = parseInt(currentField.value);
     if (val > 59) currentField.value = 59;
@@ -49,7 +49,7 @@ function validateAndJumpMinutes(currentField, nextFieldId) {
     }
 }
 
-// Seconds layout configuration execution tracking validation cap to max 59
+// Seconds constraints limits (Cap to max 59)
 function validateSeconds(currentField) {
     let val = parseInt(currentField.value);
     if (val > 59) currentField.value = 59;
@@ -59,7 +59,7 @@ function validateSeconds(currentField) {
     }
 }
 
-// Dynamic Text Output Formatter
+// Text Render Formatter Interface
 function updateDisplay() {
     const days = Math.floor(totalSecondsLeft / (24 * 3600));
     let remainder = totalSecondsLeft % (24 * 3600);
@@ -74,16 +74,14 @@ function updateDisplay() {
         `${days.toString().padStart(2, '0')}:${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 }
 
-// Logic loop runner configuration trigger
+// Core countdown trigger activation
 function toggleTimer() {
     if (timerInterval) {
-        // Pause sequence activation routing
         clearInterval(timerInterval);
         timerInterval = null;
         startButton.innerText = "Start";
         toggleInputsDisable(false);
     } else {
-        // If initializing timer fresh from inputs parse values
         if (!isRunning && totalSecondsLeft === 0) {
             const daysVal = parseInt(inputDays.value) || 0;
             const hoursVal = parseInt(inputHours.value) || 0;
@@ -92,9 +90,7 @@ function toggleTimer() {
 
             totalSecondsLeft = (daysVal * 24 * 3600) + (hoursVal * 3600) + (minutesVal * 60) + secondsVal;
 
-            if (totalSecondsLeft <= 0) {
-                return; // Block start if parameters are blank or 0
-            }
+            if (totalSecondsLeft <= 0) return;
             isRunning = true;
         }
 
@@ -107,25 +103,34 @@ function toggleTimer() {
                 totalSecondsLeft--;
                 updateDisplay();
             } else {
-                // Countdown limits breached sequence handling
                 clearInterval(timerInterval);
                 timerInterval = null;
                 startButton.innerText = "Start";
                 startButton.disabled = true;
                 triggerAlertState();
+                
+                // MOBILE VIBRATION API RUNTIME TRIGGER
+                // Fires continuous vibration for exactly 3 seconds (3000ms)
+                if (navigator.vibrate) {
+                    navigator.vibrate(3000); 
+                }
             }
         }, 1000);
     }
 }
 
-// Hard baseline reset system configuration path
+// Hard reset parameter cleanup routing
 function resetTimer() {
     clearInterval(timerInterval);
     timerInterval = null;
     totalSecondsLeft = 0;
     isRunning = false;
     
-    // Clean up typed content variables
+    // Stop ongoing browser vibration if reset button is pushed early
+    if (navigator.vibrate) {
+        navigator.vibrate(0);
+    }
+    
     inputDays.value = '';
     inputHours.value = '';
     inputMinutes.value = '';
@@ -138,7 +143,6 @@ function resetTimer() {
     updateDisplay();
 }
 
-// Enable or disable interaction on input fields
 function toggleInputsDisable(disabledStatus) {
     inputDays.disabled = disabledStatus;
     inputHours.disabled = disabledStatus;
@@ -146,17 +150,14 @@ function toggleInputsDisable(disabledStatus) {
     inputSeconds.disabled = disabledStatus;
 }
 
-// Neon warning boundary alerts activation
 function triggerAlertState() {
     cardElement.classList.add('alert-active');
     displayElement.classList.add('alert-text');
 }
 
-// Clean interface modifications parameters
 function clearAlertState() {
     cardElement.classList.remove('alert-active');
     displayElement.classList.remove('alert-text');
 }
 
-// Default layout load rendering structure initial alignment
 updateDisplay();
