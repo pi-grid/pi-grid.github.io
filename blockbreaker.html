@@ -4,12 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Infinite Block Breaker</title>
-    <!-- Aapki style file -->
     <link rel="stylesheet" href="blockbreakerstyle.css">
 </head>
 <body>
 
-    <!-- Aapke homepage ke standard single-card layout ka use -->
     <div class="container">
         <h1>BLOCK BREAKER</h1>
         
@@ -19,10 +17,8 @@
         </div>
 
         <div id="game-container">
-            <!-- Game Canvas Width is adjusted to perfectly fit your 450px container padding -->
             <canvas id="gameCanvas" width="370" height="320"></canvas>
             
-            <!-- Theme Matched Overlay Menu -->
             <div id="menu-overlay" class="overlay">
                 <h2 id="overlay-title">PAUSED</h2>
                 <button id="okay-btn">OKAY / RESUME</button>
@@ -30,12 +26,12 @@
         </div>
 
         <div class="controls">
-            <button id="pause-btn">PAUSE</button>
+            <!-- Yeh button shuru me START dikhayegi -->
+            <button id="pause-btn">START</button>
             <button id="reset-btn">RESET</button>
         </div>
     </div>
 
-    <!-- Aapki script file -->
     <script src="blockbreakerscript.js"></script>
 </body>
 </html>
