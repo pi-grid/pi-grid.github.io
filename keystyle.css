@@ -1,0 +1,129 @@
+/* --- GLOBAL RESETS & FONTS --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: linear-gradient(135deg, #0b2512 0%, #020c04 100%);
+    color: #e2e8f0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* --- MAIN CARD LAYOUT --- */
+.card {
+    text-align: center;
+    padding: 2.5rem;
+    border: 1px solid #10b981;
+    border-radius: 12px;
+    background-color: rgba(10, 25, 14, 0.85);
+    box-shadow: 0 8px 32px 0 rgba(16, 185, 129, 0.15);
+    backdrop-filter: blur(6px);
+    width: 100%;
+    max-width: 450px;
+}
+
+h2 {
+    color: #39ff14;
+    text-shadow: 0 0 10px rgba(57, 255, 20, 0.4);
+    letter-spacing: 1px;
+    margin-bottom: 1rem;
+    font-size: 2rem;
+}
+
+p {
+    color: #cbd5e1;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+}
+
+/* --- INPUT FIELDS --- */
+input[type="password"] {
+    width: 100%;
+    background: rgba(2, 12, 4, 0.6);
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    padding: 0.75rem;
+    color: #e2e8f0;
+    font-size: 1.1rem;
+    border-radius: 6px;
+    outline: none;
+    transition: all 0.3s ease;
+    margin-bottom: 1rem;
+}
+
+/* --- STRENGTH METER BAR --- */
+.checker-container {
+    text-align: left;
+    margin-top: 1.5rem;
+}
+
+.meter-container {
+    width: 100%;
+    height: 12px;
+    background: rgba(2, 12, 4, 0.8);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: 4px;
+    margin: 1rem 0;
+    overflow: hidden;
+}
+
+.meter-bar {
+    height: 100%;
+    width: 0%;
+    transition: all 0.4s ease;
+}
+
+/* --- STATUS LABELS --- */
+.status-text {
+    font-size: 0.9rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #cbd5e1;
+    margin-top: 0.5rem;
+}
+
+.hint-text {
+    font-size: 0.8rem;
+    color: #cbd5e1;
+    opacity: 0.6;
+    margin-top: 0.5rem;
+    line-height: 1.4;
+    margin-bottom: 1rem;
+}
+
+/* --- DYNAMIC COPY BUTTON --- */
+.copy-btn {
+    width: 100%;
+    background: rgba(16, 185, 129, 0.1);
+    color: #39ff14;
+    border: 1px solid #10b981;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    display: none; /* Default hidden */
+    margin-top: 0.5rem;
+}
+
+.copy-btn:hover {
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.6);
+    transform: translateY(-2px);
+}
+
+.copy-btn:active {
+    transform: translateY(0);
+}
