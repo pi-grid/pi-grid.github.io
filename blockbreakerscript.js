@@ -17,6 +17,9 @@ let isGameStarted = false;
 let isPaused = false;
 let isGameOver = false;
 
+// Refresh Rate Engine Parameters (Delta Time Tracking)
+let lastTime = 0;
+
 // Paddle Configuration
 const paddleHeight = 10;
 const paddleWidth = 75;
@@ -24,13 +27,13 @@ let paddleX = (canvas.width - paddleWidth) / 2;
 let rightPressed = false;
 let leftPressed = false;
 
-// Ball Configuration (SPEED REDUCED HERE)
+// Ball Configuration (SAFE CONTROLLED BASE SPEED)
 const ballRadius = 6;
 let x = canvas.width / 2;
 let y = canvas.height - 30;
 
-// Shuruati speed ko 3.5 se kam karke 2 kar diya hai (Bohot smooth chalega)
-const baseSpeed = 2; 
+// Base speed ko 120 pixels per second par set kiya hai (Bohot calm chalega)
+const baseSpeed = 120; 
 let dx = baseSpeed;
 let dy = -baseSpeed;
 
@@ -61,7 +64,6 @@ document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
 document.addEventListener("mousemove", mouseMoveHandler, false);
 
-// Touch tracking logic for mobile
 canvas.addEventListener("touchmove", (e) => {
     e.preventDefault();
     const rect = canvas.getBoundingClientRect();
@@ -113,10 +115,10 @@ function collisionDetection() {
         initBricks();
         resetBallAndPaddle();
         
-        // Naye wave par speed sirf 0.15 badhegi (Pehle 0.4 badh rahi thi)
-        const speedIncrement = wave * 0.15;
-        dx = dx > 0 ? baseSpeed + speedIncrement : -(baseSpeed + speedIncrement);
-        dy = dy > 0 ? baseSpeed + speedIncrement : -(baseSpeed + speedIncrement);
+        // Next waves me sirf halki si safe scaling speed increments (15px per wave increase)
+        const currentSpeed = baseSpeed + (wave * 15);
+        dx = dx > 0 ? currentSpeed : -currentSpeed;
+        dy = dy > 0 ? currentSpeed : -currentSpeed;
     }
 }
 
@@ -210,7 +212,17 @@ okayBtn.addEventListener("click", () => {
 });
 resetBtn.addEventListener("click", restartGame);
 
-function gameLoop() {
+// Time Dependent Framework Loop Engine
+function gameLoop(timestamp) {
+    if (!lastTime) lastTime = timestamp;
+    
+    // Seconds format breakdown calculations
+    let dt = (timestamp - lastTime) / 1000;
+    lastTime = timestamp;
+
+    // Delta compression caps to prevent breaks during heavy background frame lag
+    if (dt > 0.1) dt = 0.1; 
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
     drawBricks();
@@ -228,13 +240,13 @@ function gameLoop() {
     else if (!isPaused && !isGameOver) {
         collisionDetection();
 
-        if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) {
+        if (x + (dx * dt) > canvas.width - ballRadius || x + (dx * dt) < ballRadius) {
             dx = -dx;
         }
-        if (y + dy < ballRadius) {
+        if (y + (dy * dt) < ballRadius) {
             dy = -dy;
         } 
-        else if (y + dy > canvas.height - ballRadius) {
+        else if (y + (dy * dt) > canvas.height - ballRadius) {
             if (x > paddleX && x < paddleX + paddleWidth) {
                 dy = -dy;
             } else {
@@ -242,19 +254,24 @@ function gameLoop() {
             }
         }
 
-        // Paddle response speed control fallback
+        // Keyboard tracking fallback calculation engine
         if (rightPressed && paddleX < canvas.width - paddleWidth) {
-            paddleX += 5;
+            paddleX += 300 * dt; // 300px per second frame locked speed
         } else if (leftPressed && paddleX > 0) {
-            paddleX -= 5;
+            paddleX -= 300 * dt;
         }
 
-        x += dx;
-        y += dy;
+        // Ball movement calculation locked tightly to actual real-time spent 
+        x += dx * dt;
+        y += dy * dt;
     }
 
     requestAnimationFrame(gameLoop);
 }
 
 initBricks();
-gameLoop();
+// First framework timestamp initialization anchor trigger
+requestAnimationFrame((timestamp) => {
+    lastTime = timestamp;
+    gameLoop(timestamp);
+});
