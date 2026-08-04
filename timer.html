@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProductiveTimerTimer</title>
+    
+    <style>
+        /* --- 1. GLOBAL RESETS & FONTS --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #0b2512 0%, #020c04 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* --- 2. GLOBAL CONTAINER CARD --- */
+        .card {
+            text-align: center;
+            padding: 2.5rem;
+            border: 1px solid #10b981;
+            border-radius: 12px;
+            background-color: rgba(10, 25, 14, 0.85);
+            box-shadow: 0 8px 32px 0 rgba(16, 185, 129, 0.15);
+            backdrop-filter: blur(6px);
+            width: 100%;
+            max-width: 450px;
+        }
+
+        /* --- 3. HEADINGS & TEXT --- */
+        h2 {
+            color: #39ff14;
+            text-shadow: 0 0 10px rgba(57, 255, 20, 0.4);
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+            font-size: 2rem;
+        }
+
+        p {
+            color: #cbd5e1;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            line-height: 1.5;
+            margin-bottom: 1.5rem;
+        }
+
+        /* --- 4. MODE TOGGLE SWITCHES --- */
+        .mode-container {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .mode-btn {
+            background: rgba(2, 12, 4, 0.6);
+            color: #cbd5e1;
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .mode-btn:hover {
+            border-color: #39ff14;
+            color: #39ff14;
+        }
+
+        .mode-btn.active {
+            background: rgba(16, 185, 129, 0.2);
+            color: #39ff14;
+            border-color: #39ff14;
+            box-shadow: 0 0 10px rgba(57, 255, 20, 0.3);
+        }
+
+        /* --- 5. TIMER CHRONO READOUT --- */
+        .timer-display {
+            font-family: monospace;
+            font-size: 4.5rem;
+            font-weight: bold;
+            color: #39ff14;
+            text-shadow: 0 0 20px rgba(57, 255, 20, 0.6);
+            margin: 1.5rem 0;
+            letter-spacing: 2px;
+        }
+
+        /* --- 6. ACTION CONTROLS --- */
+        .controls-container {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+
+        button.btn {
+            background: rgba(16, 185, 129, 0.1);
+            color: #39ff14;
+            border: 1px solid #10b981;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            flex: 1;
+        }
+
+        button.btn:hover {
+            background: #10b981;
+            color: #020c04;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.6);
+            transform: translateY(-2px);
+        }
+
+        button.btn:active {
+            transform: translateY(0);
+        }
+
+        button.btn-reset {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.5);
+        }
+
+        button.btn-reset:hover {
+            background: #ef4444;
+            color: #020c04;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.6);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>Chronos Node</h2>
+        <p>Productivity Engine</p>
+        
+        <!-- Mode Switches -->
+        <div class="mode-container">
+            <button class="mode-btn active" onclick="setMode('work')">Work</button>
+            <button class="mode-btn" onclick="setMode('short')">Short Break</button>
+            <button class="mode-btn" onclick="setMode('long')">Long Break</button>
+        </div>
+
+        <!-- Big Chrono Readout Display -->
+        <div id="timer" class="timer-display">25:00</div>
+        
+        <!-- Logic Trigger Buttons -->
+        <div class="controls-container">
+            <button id="start-btn" class="btn" onclick="toggleTimer()">Start</button>
+            <button class="btn btn-reset" onclick="resetTimer()">Reset</button>
+        </div>
+    </div>
+
+    <script>
+        // Engine Default Parameters (in minutes)
+        const times = {
+            work: 25,
+            short: 5,
+            long: 15
+        };
+
+        let currentMode = 'work';
+        let timeLeft = times[currentMode] * 60;
+        let timerInterval = null;
+
+        const timerDisplay = document.getElementById('timer');
+        const startBtn = document.getElementById('start-btn');
+        const modeButtons = document.querySelectorAll('.mode-btn');
+
+        // Dynamic Display Engine formatter
+        function updateDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            const formattedMinutes = minutes.toString().padStart(2, '0');
+            const formattedSeconds = seconds.toString().padStart(2, '0');
+            
+            timerDisplay.innerText = `${formattedMinutes}:${formattedSeconds}`;
+        }
+
+        // Engine Interval Controller Loop
+        function toggleTimer() {
+            if (timerInterval) {
+                // Pause action configuration
+                clearInterval(timerInterval);
+                timerInterval = null;
+                startBtn.innerText = "Start";
+                startBtn.style.boxShadow = "none";
+            } else {
+                // Start tracking loop execution
+                startBtn.innerText = "Pause";
+                timerInterval = setInterval(() => {
+                    if (timeLeft > 0) {
+                        timeLeft--;
+                        updateDisplay();
+                    } else {
+                        // Countdown finish handling
+                        clearInterval(timerInterval);
+                        timerInterval = null;
+                        startBtn.innerText = "Start";
+                        alertModeCompletion();
+                    }
+                }, 1000);
+            }
+        }
+
+        // Hard System Parameters Reset Engine
+        function resetTimer() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            timeLeft = times[currentMode] * 60;
+            startBtn.innerText = "Start";
+            updateDisplay();
+        }
+
+        // Engine Active Profile Switching Router
+        function setMode(mode) {
+            currentMode = mode;
+            
+            // Re-render Active CSS status styles on buttons
+            modeButtons.forEach(btn => btn.classList.remove('active'));
+            const targetIndex = mode === 'work' ? 0 : mode === 'short' ? 1 : 2;
+            modeButtons[targetIndex].classList.add('active');
+            
+            resetTimer();
+        }
+
+        // Completion alert warning fallback handler
+        function alertModeCompletion() {
+            // Native tone alert framework placeholder
+            if (currentMode === 'work') {
+                alert("Session complete! Time to interface with a quick break sequence.");
+            } else {
+                alert("Break cycle ended. Re-initializing core focus architecture.");
+            }
+        }
+
+        // Initialize execution grid display default output state
+        updateDisplay();
+    </script>
+</body>
+</html>
