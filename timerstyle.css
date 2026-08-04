@@ -1,0 +1,180 @@
+/* --- 1. GLOBAL RESETS & FONTS --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: linear-gradient(135deg, #0b2512 0%, #020c04 100%);
+    color: #e2e8f0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* --- 2. GLOBAL CONTAINER CARD --- */
+.card {
+    text-align: center;
+    padding: 2.5rem;
+    border: 1px solid #10b981;
+    border-radius: 12px;
+    background-color: rgba(10, 25, 14, 0.85);
+    box-shadow: 0 8px 32px 0 rgba(16, 185, 129, 0.15);
+    backdrop-filter: blur(6px);
+    width: 100%;
+    max-width: 480px;
+    transition: all 0.5s ease;
+}
+
+/* Alert state border when countdown triggers 00:00:00:00 */
+.card.alert-active {
+    border-color: #ef4444;
+    box-shadow: 0 0 25px rgba(239, 68, 68, 0.5);
+    animation: alertBlink 1.5s infinite alternate;
+}
+
+@keyframes alertBlink {
+    0% { border-color: rgba(239, 68, 68, 0.4); box-shadow: 0 0 10px rgba(239, 68, 68, 0.2); }
+    100% { border-color: rgba(239, 68, 68, 1); box-shadow: 0 0 25px rgba(239, 68, 68, 0.6); }
+}
+
+/* --- 3. HEADINGS & TEXT --- */
+h2 {
+    color: #39ff14;
+    text-shadow: 0 0 10px rgba(57, 255, 20, 0.4);
+    letter-spacing: 1px;
+    margin-bottom: 1rem;
+    font-size: 2rem;
+    text-transform: uppercase;
+}
+
+p {
+    color: #cbd5e1;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+}
+
+/* --- 4. TYPING INPUT GRID --- */
+.input-grid {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.input-box {
+    flex: 1;
+    text-align: center;
+}
+
+.input-box label {
+    display: block;
+    font-size: 0.7Rules;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #cbd5e1;
+    margin-bottom: 0.5rem;
+}
+
+/* Number typing field fields styling */
+input[type="number"] {
+    width: 100%;
+    background: rgba(2, 12, 4, 0.6);
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    padding: 0.75rem 0.25rem;
+    color: #e2e8f0;
+    font-size: 1.2rem;
+    font-family: monospace;
+    border-radius: 6px;
+    outline: none;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+input[type="number"]:focus {
+    border-color: #39ff14;
+    box-shadow: 0 0 10px rgba(57, 255, 20, 0.3);
+}
+
+/* Hide default browser up/down arrows inside number fields */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* --- 5. TIMER CHRONO READOUT --- */
+.timer-display {
+    font-family: monospace;
+    font-size: 3.2rem;
+    font-weight: bold;
+    color: #39ff14;
+    text-shadow: 0 0 20px rgba(57, 255, 20, 0.6);
+    margin: 1.5rem 0 2rem 0;
+    letter-spacing: 1px;
+    transition: color 0.3s ease;
+}
+
+.timer-display.alert-text {
+    color: #ef4444;
+    text-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
+}
+
+/* --- 6. ACTION CONTROLS --- */
+.controls-container {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+button.btn {
+    background: rgba(16, 185, 129, 0.1);
+    color: #39ff14;
+    border: 1px solid #10b981;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    flex: 1;
+}
+
+button.btn:hover:not(:disabled) {
+    background: #10b981;
+    color: #020c04;
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.6);
+    transform: translateY(-2px);
+}
+
+button.btn:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+button.btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    border-color: rgba(16, 185, 129, 0.2);
+    color: #cbd5e1;
+}
+
+button.btn-reset {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.5);
+}
+
+button.btn-reset:hover {
+    background: #ef4444;
+    color: #020c04;
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.6);
+}
