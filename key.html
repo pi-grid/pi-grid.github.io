@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Key Guardian - Password Strength Checker</title>
+    
+    <!-- 1. ADVANCED STRENGTH ESTIMATION ENGINE (zxcvbn) -->
+    <script src="https://cloudflare.com"></script>
+
+    <style>
+        /* --- 2. GLOBAL RESETS & FONTS --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #0b2512 0%, #020c04 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* --- 3. MAIN CARD LAYOUT --- */
+        .card {
+            text-align: center;
+            padding: 2.5rem;
+            border: 1px solid #10b981;
+            border-radius: 12px;
+            background-color: rgba(10, 25, 14, 0.85);
+            box-shadow: 0 8px 32px 0 rgba(16, 185, 129, 0.15);
+            backdrop-filter: blur(6px);
+            width: 100%;
+            max-width: 450px;
+        }
+
+        /* --- 4. HEADINGS & TEXT --- */
+        h2 {
+            color: #39ff14;
+            text-shadow: 0 0 10px rgba(57, 255, 20, 0.4);
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+            font-size: 2rem;
+        }
+
+        p {
+            color: #cbd5e1;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            line-height: 1.5;
+            margin-bottom: 1.5rem;
+        }
+
+        /* --- 5. INPUT FIELDS --- */
+        input[type="password"] {
+            width: 100%;
+            background: rgba(2, 12, 4, 0.6);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            padding: 0.75rem;
+            color: #e2e8f0;
+            font-size: 1.1rem;
+            border-radius: 6px;
+            outline: none;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+
+        input:focus {
+            border-color: #39ff14;
+            box-shadow: 0 0 10px rgba(57, 255, 20, 0.3);
+        }
+
+        /* --- 6. PASSWORD CHECKER MODULE --- */
+        .checker-container {
+            text-align: left;
+            margin-top: 1.5rem;
+        }
+
+        meter {
+            width: 100%;
+            height: 12px;
+            display: block;
+            margin: 1rem 0;
+            background: rgba(2, 12, 4, 0.8);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        meter::-webkit-meter-bar {
+            background: rgba(2, 12, 4, 0.8);
+            border-radius: 4px;
+        }
+
+        /* Neon Glow Metric Mapping */
+        meter[value="1"]::-webkit-meter-optimum-value { 
+            background: #ef4444; 
+            box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+        } 
+        meter[value="2"]::-webkit-meter-optimum-value { 
+            background: #f59e0b; 
+            box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+        } 
+        meter[value="3"]::-webkit-meter-optimum-value { 
+            background: #eab308; 
+            box-shadow: 0 0 8px rgba(234, 179, 8, 0.6);
+        } 
+        meter[value="4"]::-webkit-meter-optimum-value { 
+            background: #39ff14; 
+            box-shadow: 0 0 12px rgba(57, 255, 20, 0.8);
+        }
+
+        /* Status & Feedback Label Typography */
+        .status-text {
+            font-size: 0.9rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #cbd5e1;
+            margin-top: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .warning-text {
+            font-size: 0.85rem;
+            color: #ef4444;
+            margin-top: 0.75rem;
+            font-family: sans-serif;
+            text-transform: none;
+            letter-spacing: 0;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 7. HTML STRUCTURAL MARKUP -->
+    <div class="card">
+        <h2>Key Guardian</h2>
+        <p>Password Strength Checker</p>
+        
+        <div class="checker-container">
+            <input type="password" id="password" placeholder="Type your password...">
+            <meter max="4" id="strength-meter" value="0"></meter>
+            <div id="strength-text" class="status-text">Too weak ❌</div>
+            <div id="feedback-text" class="warning-text"></div>
+        </div>
+    </div>
+
+    <!-- 8. JAVASCRIPT REAL-TIME ENGINE -->
+    <script>
+        const passwordInput = document.getElementById('password');
+        const strengthMeter = document.getElementById('strength-meter');
+        const strengthText = document.getElementById('strength-text');
+        const feedbackText = document.getElementById('feedback-text');
+
+        const textFeedbacks = [
+            'Too weak ❌', 
+            'Weak ⚠️', 
+            'Fair 🟡', 
+            'Good 🟢', 
+            'Strong 💪'
+        ];
+
+        passwordInput.addEventListener('input', () => {
+            const val = passwordInput.value;
+
+            if (val.length === 0) {
+                strengthMeter.value = 0;
+                strengthText.innerText = 'Too weak ❌';
+                feedbackText.innerText = '';
+                return;
+            }
+
+            // Advanced estimation evaluating predictability, patterns & dictionaries
+            const result = zxcvbn(val);
+            const score = result.score; 
+
+            // Update UI elements
+            strengthMeter.value = score;
+            strengthText.innerText = textFeedbacks[score];
+
+            // Print warning suggestions if common structures are detected
+            if (result.feedback.warning) {
+                feedbackText.innerText = `💡 ${result.feedback.warning}. ${result.feedback.suggestions.join(' ')}`;
+            } else {
+                feedbackText.innerText = '';
+            }
+        });
+    </script>
+</body>
+</html>
