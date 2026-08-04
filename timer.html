@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Timer Terminal</title>
+    <title>PI-Grid Timer</title>
     <!-- Linking external CSS layout -->
     <link rel="stylesheet" href="timerstyle.css">
 </head>
@@ -11,13 +11,13 @@
 
     <div id="timer-card" class="card">
         <h2>Timer</h2>
-        <p>Countdown Module</p>
+        <p>Countdown Starts In…</p>
         
         <!-- Typing Input Area with custom limits and infinite days -->
         <div class="input-grid" id="input-fields-container">
             <div class="input-box">
                 <label>Days</label>
-                <input type="number" id="input-days" placeholder="00" min="0" oninput="validateAndJumpDays(this, 'input-hours')">
+                <input type="number" id="input-days" placeholder="00" min="0" max="9999999999999" oninput="validateAndJumpDays(this, 'input-hours')">
             </div>
             <div class="input-box">
                 <label>Hours</label>
