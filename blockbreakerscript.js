@@ -10,17 +10,17 @@ const okayBtn = document.getElementById("okay-btn");
 const menuOverlay = document.getElementById("menu-overlay");
 const overlayTitle = document.getElementById("overlay-title");
 
-// Game State Variables
+// Game State Engine Variables
 let score = 0;
 let wave = 1;
-let isGameStarted = false; // Game start check system
+let isGameStarted = false; // Isko use karke loop ko roka jata hai
 let isPaused = false;
 let isGameOver = false;
 let animationFrameId = null;
 
 // Paddle Configuration
 const paddleHeight = 10;
-const paddleWidth = 70;
+const paddleWidth = 75;
 let paddleX = (canvas.width - paddleWidth) / 2;
 let rightPressed = false;
 let leftPressed = false;
@@ -55,13 +55,20 @@ function initBricks() {
     }
 }
 
-// Keyboard Event Listeners
+// Global Event Listeners - Dynamic tracking method updates
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
-// MOUSE MOVEMENT LISTENER (Bouncer control karne ke liye)
 document.addEventListener("mousemove", mouseMoveHandler, false);
-// TOUCH DEVICE LISTENER (Mobile par smooth control ke liye)
-canvas.addEventListener("touchmove", touchMoveHandler, { passive: false });
+
+// Touch tracking logic for mobile
+canvas.addEventListener("touchmove", (e) => {
+    e.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    const touchX = e.touches[0].clientX - rect.left;
+    if (touchX > 0 && touchX < canvas.width) {
+        paddleX = touchX - paddleWidth / 2;
+    }
+}, { passive: false });
 
 function keyDownHandler(e) {
     if (e.key === "Right" || e.key === "ArrowRight") rightPressed = true;
@@ -74,18 +81,11 @@ function keyUpHandler(e) {
     else if (e.key === "Left" || e.key === "ArrowLeft") leftPressed = false;
 }
 
-// Mouse movement core control calculator
+// Bouncer super-responsive calculations engine
 function mouseMoveHandler(e) {
-    const relativeX = e.clientX - canvas.getBoundingClientRect().left;
-    if (relativeX > 0 && relativeX < canvas.width) {
-        paddleX = relativeX - paddleWidth / 2;
-    }
-}
-
-// Touch swipe calculation platform
-function touchMoveHandler(e) {
-    e.preventDefault(); // Screen scroll hone se rokne ke liye
-    const relativeX = e.touches[0].clientX - canvas.getBoundingClientRect().left;
+    const rect = canvas.getBoundingClientRect();
+    const relativeX = e.clientX - rect.left;
+    // Agar cursor canvas bound ke andar hai tabhi update karein
     if (relativeX > 0 && relativeX < canvas.width) {
         paddleX = relativeX - paddleWidth / 2;
     }
@@ -158,91 +158,26 @@ function drawBricks() {
     }
 }
 
-// Welcome Screen Text Renderer
-function drawWelcomeScreen() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawBricks();
-    drawPaddle();
-    drawBall();
-    
-    // Welcome text styling matrix neon overlay
-    ctx.fillStyle = "rgba(2, 12, 4, 0.75)";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    ctx.font = "bold 16px -apple-system, BlinkMacSystemFont, Arial";
-    ctx.fillStyle = "#39ff14";
-    ctx.textAlign = "center";
-    ctx.fillText("CLICK START TO PLAY", canvas.width / 2, canvas.height / 2 + 5);
-}
-
-// Core Engine Loop
-function draw() {
-    if (!isGameStarted) {
-        drawWelcomeScreen();
-        return;
-    }
-
-    if (isPaused || isGameOver) return;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawBricks();
-    drawBall();
-    drawPaddle();
-    collisionDetection();
-
-    if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) {
-        dx = -dx;
-    }
-    if (y + dy < ballRadius) {
-        dy = -dy;
-    } 
-    else if (y + dy > canvas.height - ballRadius) {
-        if (x > paddleX && x < paddleX + paddleWidth) {
-            dy = -dy;
-        } else {
-            triggerGameOver();
-            return;
-        }
-    }
-
-    if (rightPressed && paddleX < canvas.width - paddleWidth) {
-        paddleX += 6;
-    } else if (leftPressed && paddleX > 0) {
-        paddleX -= 6;
-    }
-
-    x += dx;
-    y += dy;
-
-    animationFrameId = requestAnimationFrame(draw);
-}
-
-// Start & Pause Trigger controller combined engine
+// Dynamic State Logic Controller
 function handleStartPauseLogic() {
     if (isGameOver) return;
 
     if (!isGameStarted) {
-        // Shuru me START dabane par game chalu hoga
         isGameStarted = true;
         pauseBtn.innerText = "PAUSE";
-        draw();
     } else {
-        // Baad me dabane par PAUSE/RESUME hoga
         isPaused = !isPaused;
         if (isPaused) {
-            cancelAnimationFrame(animationFrameId);
             overlayTitle.innerText = "GAME PAUSED";
             menuOverlay.style.display = "flex";
         } else {
             menuOverlay.style.display = "none";
-            draw();
         }
     }
 }
 
 function triggerGameOver() {
     isGameOver = true;
-    cancelAnimationFrame(animationFrameId);
     overlayTitle.innerText = "GAME OVER";
     okayBtn.innerText = "PLAY AGAIN";
     menuOverlay.style.display = "flex";
@@ -253,7 +188,7 @@ function restartGame() {
     wave = 1;
     dx = baseSpeed;
     dy = -baseSpeed;
-    isGameStarted = false; // Reset to welcome state
+    isGameStarted = false; 
     isPaused = false;
     isGameOver = false;
     scoreText.innerText = score;
@@ -262,21 +197,70 @@ function restartGame() {
     menuOverlay.style.display = "none";
     initBricks();
     resetBallAndPaddle();
-    cancelAnimationFrame(animationFrameId);
-    draw();
 }
 
-// Button Events
+// Click Listeners Binding
 pauseBtn.addEventListener("click", handleStartPauseLogic);
 okayBtn.addEventListener("click", () => {
     if (isGameOver) {
         restartGame();
     } else {
-        handleStartPauseLogic(); // Acts as Okay/Resume close trigger
+        handleStartPauseLogic();
     }
 });
 resetBtn.addEventListener("click", restartGame);
 
-// Initial setup rendering system
+// Main Operational Framework Loop
+function gameLoop() {
+    // Canvas background clean render
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw static elements (Yeh freeze state me bhi dikhte rahenge)
+    drawBricks();
+    drawPaddle();
+    drawBall();
+
+    // Agar game start nahi hua hai, to canvas par overlay alert render karein
+    if (!isGameStarted) {
+        ctx.fillStyle = "rgba(2, 12, 4, 0.8)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.font = "bold 16px sans-serif";
+        ctx.fillStyle = "#39ff14";
+        ctx.textAlign = "center";
+        ctx.fillText("CLICK THE START BUTTON TO PLAY", canvas.width / 2, canvas.height / 2);
+    } 
+    // Agar start ho gaya hai aur pause nahi hai, to ball movement update karein
+    else if (!isPaused && !isGameOver) {
+        collisionDetection();
+
+        if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) {
+            dx = -dx;
+        }
+        if (y + dy < ballRadius) {
+            dy = -dy;
+        } 
+        else if (y + dy > canvas.height - ballRadius) {
+            if (x > paddleX && x < paddleX + paddleWidth) {
+                dy = -dy;
+            } else {
+                triggerGameOver();
+            }
+        }
+
+        // Keyboard triggers standard fallback movement calculations
+        if (rightPressed && paddleX < canvas.width - paddleWidth) {
+            paddleX += 7;
+        } else if (leftPressed && paddleX > 0) {
+            paddleX -= 7;
+        }
+
+        x += dx;
+        y += dy;
+    }
+
+    requestAnimationFrame(gameLoop);
+}
+
+// Game init
 initBricks();
-draw();
+gameLoop();
