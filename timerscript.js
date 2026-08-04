@@ -11,7 +11,7 @@ const inputHours = document.getElementById('input-hours');
 const inputMinutes = document.getElementById('input-minutes');
 const inputSeconds = document.getElementById('input-seconds');
 
-// Infinite days auto focus engine tracker
+// Infinite days auto focus jump logic
 function validateAndJumpDays(currentField, nextFieldId) {
     if (currentField.value.length === 2) {
         const nextTarget = document.getElementById(nextFieldId);
@@ -19,7 +19,7 @@ function validateAndJumpDays(currentField, nextFieldId) {
     }
 }
 
-// Hours dynamic tracking logic (Cap to max 23)
+// Hours dynamic limitation engine (Cap to max 23)
 function validateAndJumpHours(currentField, nextFieldId) {
     let val = parseInt(currentField.value);
     if (val > 23) currentField.value = 23;
@@ -34,7 +34,7 @@ function validateAndJumpHours(currentField, nextFieldId) {
     }
 }
 
-// Minutes dynamic tracking logic (Cap to max 59)
+// Minutes dynamic limitation engine (Cap to max 59)
 function validateAndJumpMinutes(currentField, nextFieldId) {
     let val = parseInt(currentField.value);
     if (val > 59) currentField.value = 59;
@@ -49,7 +49,7 @@ function validateAndJumpMinutes(currentField, nextFieldId) {
     }
 }
 
-// Seconds constraints limits (Cap to max 59)
+// Seconds constraints verification limits (Cap to max 59)
 function validateSeconds(currentField) {
     let val = parseInt(currentField.value);
     if (val > 59) currentField.value = 59;
@@ -59,7 +59,7 @@ function validateSeconds(currentField) {
     }
 }
 
-// Text Render Formatter Interface
+// Text Render Layout Output Formatter
 function updateDisplay() {
     const days = Math.floor(totalSecondsLeft / (24 * 3600));
     let remainder = totalSecondsLeft % (24 * 3600);
@@ -109,24 +109,25 @@ function toggleTimer() {
                 startButton.disabled = true;
                 triggerAlertState();
                 
-                // MOBILE VIBRATION API RUNTIME TRIGGER
-                // Fires continuous vibration for exactly 3 seconds (3000ms)
+                // MOBILE PULSE VIBRATION ARRAY ENGINE
+                // Pattern structure: [vibrate, pause, vibrate, pause...]
+                // Total breakdown calculation: 500+250 + 500+250 + 500+250 + 500+250 = 3000ms (Exact 3 Seconds pulse)
                 if (navigator.vibrate) {
-                    navigator.vibrate(3000); 
+                    navigator.vibrate([500, 250, 500, 250, 500, 250, 500, 250]); 
                 }
             }
         }, 1000);
     }
 }
 
-// Hard reset parameter cleanup routing
+// Hard baseline parameters reset system
 function resetTimer() {
     clearInterval(timerInterval);
     timerInterval = null;
     totalSecondsLeft = 0;
     isRunning = false;
     
-    // Stop ongoing browser vibration if reset button is pushed early
+    // Stop ongoing browser vibration pulsing sequences if reset is clicked early
     if (navigator.vibrate) {
         navigator.vibrate(0);
     }
@@ -160,4 +161,5 @@ function clearAlertState() {
     displayElement.classList.remove('alert-text');
 }
 
+// Initialize layout parameters rendering default status
 updateDisplay();
