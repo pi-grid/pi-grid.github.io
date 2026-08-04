@@ -1,5 +1,6 @@
 let totalSecondsLeft = 0;
 let timerInterval = null;
+let vibrationInterval = null; // Infinite loop ke liye naya variable
 let isRunning = false;
 
 const cardElement = document.getElementById('timer-card');
@@ -109,11 +110,15 @@ function toggleTimer() {
                 startButton.disabled = true;
                 triggerAlertState();
                 
-                // MOBILE PULSE VIBRATION ARRAY ENGINE
-                // Pattern structure: [vibrate, pause, vibrate, pause...]
-                // Total breakdown calculation: 500+250 + 500+250 + 500+250 + 500+250 = 3000ms (Exact 3 Seconds pulse)
+                // INFINITE MOBILE PULSE VIBRATION ENGINE
                 if (navigator.vibrate) {
+                    // Pehli baar turant chalane ke liye
                     navigator.vibrate([500, 250, 500, 250, 500, 250, 500, 250]); 
+                    
+                    // Har 3 second (3000ms) me loop karne ke liye
+                    vibrationInterval = setInterval(() => {
+                        navigator.vibrate([500, 250, 500, 250, 500, 250, 500, 250]);
+                    }, 3000);
                 }
             }
         }, 1000);
@@ -124,10 +129,17 @@ function toggleTimer() {
 function resetTimer() {
     clearInterval(timerInterval);
     timerInterval = null;
+    
+    // Vibration loop ko stop karne ke liye
+    if (vibrationInterval) {
+        clearInterval(vibrationInterval);
+        vibrationInterval = null;
+    }
+    
     totalSecondsLeft = 0;
     isRunning = false;
     
-    // Stop ongoing browser vibration pulsing sequences if reset is clicked early
+    // Ongoing browser vibration pattern clear karne ke liye
     if (navigator.vibrate) {
         navigator.vibrate(0);
     }
