@@ -3,33 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Block Breaker</title>
-    <!-- CSS file link ki gayi hai -->
+    <title>Infinite Block Breaker</title>
+    <!-- Aapki style file -->
     <link rel="stylesheet" href="blockbreakerstyle.css">
 </head>
 <body>
 
-    <div class="ui-panel">
-        <div>Score: <span id="score-text">0</span></div>
-        <div>Wave: <span id="wave-text">1</span></div>
-    </div>
-
-    <div id="game-container">
-        <canvas id="gameCanvas" width="480" height="320"></canvas>
+    <!-- Aapke homepage ke standard single-card layout ka use -->
+    <div class="container">
+        <h1>BLOCK BREAKER</h1>
         
-        <!-- Pause / Message Overlay -->
-        <div id="menu-overlay" class="overlay">
-            <h2 id="overlay-title">PAUSED</h2>
-            <button id="okay-btn">OKAY / RESUME</button>
+        <div class="ui-panel">
+            <div>SCORE: <span id="score-text">0</span></div>
+            <div>WAVE: <span id="wave-text">1</span></div>
+        </div>
+
+        <div id="game-container">
+            <!-- Game Canvas Width is adjusted to perfectly fit your 450px container padding -->
+            <canvas id="gameCanvas" width="370" height="320"></canvas>
+            
+            <!-- Theme Matched Overlay Menu -->
+            <div id="menu-overlay" class="overlay">
+                <h2 id="overlay-title">PAUSED</h2>
+                <button id="okay-btn">OKAY / RESUME</button>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button id="pause-btn">PAUSE</button>
+            <button id="reset-btn">RESET</button>
         </div>
     </div>
 
-    <div class="controls">
-        <button id="pause-btn">PAUSE</button>
-        <button id="reset-btn">RESET</button>
-    </div>
-
-    <!-- JavaScript file link ki gayi hai -->
+    <!-- Aapki script file -->
     <script src="blockbreakerscript.js"></script>
 </body>
 </html>
