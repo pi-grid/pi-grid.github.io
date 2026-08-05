@@ -112,7 +112,6 @@ function mouseMoveHandler(e) {
         paddleX = relativeX - paddleWidth / 2;
     }
 }
-
 function collisionDetection() {
     let activeBricks = 0;
     for (let c = 0; c < brickColumnCount; c++) {
@@ -334,6 +333,14 @@ function gameLoop(timestamp) {
         } else if (leftPressed && paddleX > 0) {
             paddleX -= 300 * dt;
             if (paddleX < 0) paddleX = 0;
+        }
+    }
+
+    requestAnimationFrame(gameLoop);
 }
-    }requestAnimationFrame(gameLoop);
-}initBricks();requestAnimationFrame((timestamp) => {lastTime = timestamp;gameLoop(timestamp);});
+
+initBricks();
+requestAnimationFrame((timestamp) => {
+    lastTime = timestamp;
+    gameLoop(timestamp);
+});
