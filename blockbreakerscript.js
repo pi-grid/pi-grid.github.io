@@ -17,6 +17,11 @@ let isGameStarted = false;
 let isPaused = false;
 let isGameOver = false;
 
+// Intermission Countdown Engine Variables
+let isCountdownActive = false;
+let countdownValue = 3;
+let countdownTimer = 0;
+
 // Refresh Rate Engine Parameters (Delta Time Tracking)
 let lastTime = 0;
 
@@ -27,12 +32,12 @@ let paddleX = (canvas.width - paddleWidth) / 2;
 let rightPressed = false;
 let leftPressed = false;
 
-// Ball Configuration (SAFE CONTROLLED BASE SPEED)
+// Ball Configuration
 const ballRadius = 6;
 let x = canvas.width / 2;
 let y = canvas.height - 30;
 
-// Base speed ko 120 pixels per second par set kiya hai (Bohot calm chalega)
+// Base Speed Configurations
 const baseSpeed = 120; 
 let dx = baseSpeed;
 let dy = -baseSpeed;
@@ -64,14 +69,32 @@ document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
 document.addEventListener("mousemove", mouseMoveHandler, false);
 
+// Improved Touch Control: Pura slide/drag behavior dynamic tracking ke sath
+let touchStartX = null;
+canvas.addEventListener("touchstart", (e) => {
+    const touch = e.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    touchStartX = touch.clientX - rect.left;
+}, { passive: true });
+
 canvas.addEventListener("touchmove", (e) => {
     e.preventDefault();
+    if (touchStartX === null) return;
+    
     const rect = canvas.getBoundingClientRect();
-    const touchX = e.touches.clientX - rect.left;
-    if (touchX > 0 && touchX < canvas.width) {
-        paddleX = touchX - paddleWidth / 2;
-    }
+    const touchX = e.touches[0].clientX - rect.left;
+    
+    // Smooth sliding calculation based on drag offset
+    paddleX = touchX - paddleWidth / 2;
+    
+    // Keep paddle inside canvas boundaries
+    if (paddleX < 0) paddleX = 0;
+    if (paddleX > canvas.width - paddleWidth) paddleX = canvas.width - paddleWidth;
 }, { passive: false });
+
+canvas.addEventListener("touchend", () => {
+    touchStartX = null;
+}, { passive: true });
 
 function keyDownHandler(e) {
     if (e.key === "Right" || e.key === "ArrowRight") rightPressed = true;
@@ -99,32 +122,36 @@ function collisionDetection() {
             let b = bricks[c][r];
             if (b.status === 1) {
                 activeBricks++;
-                if (x > b.x && x < b.x + brickWidth && y > b.y && y < b.y + brickHeight) {
+                // Strict directional boundaries check to avoid double overlaps
+                if (x + ballRadius > b.x && x - ballRadius < b.x + brickWidth &&
+                    y + ballRadius > b.y && y - ballRadius < b.y + brickHeight) {
                     dy = -dy;
                     b.status = 0;
                     score += 10;
                     scoreText.innerText = score;
+                    activeBricks--;
                 }
             }
         }
     }
 
-    if (activeBricks === 0) {
-        wave++;
-        waveText.innerText = wave;
-        initBricks();
-        resetBallAndPaddle();
-        
-        // Next waves me sirf halki si safe scaling speed increments (15px per wave increase)
-        const currentSpeed = baseSpeed + (wave * 15);
-        dx = dx > 0 ? currentSpeed : -currentSpeed;
-        dy = dy > 0 ? currentSpeed : -currentSpeed;
+    // Trigger Intermission Engine instead of direct flash-skip
+    if (activeBricks === 0 && !isCountdownActive) {
+        startWaveCountdown();
     }
+}
+
+function startWaveCountdown() {
+    isCountdownActive = true;
+    countdownValue = 3;
+    countdownTimer = 0;
+    resetBallAndPaddle();
 }
 
 function resetBallAndPaddle() {
     x = canvas.width / 2;
-    y = canvas.height - 30;
+    // Set position safely resting right above the paddle top height
+    y = canvas.height - paddleHeight - ballRadius - 2;
     paddleX = (canvas.width - paddleWidth) / 2;
 }
 
@@ -163,7 +190,7 @@ function drawBricks() {
 }
 
 function handleStartPauseLogic() {
-    if (isGameOver) return;
+    if (isGameOver || isCountdownActive) return;
 
     if (!isGameStarted) {
         isGameStarted = true;
@@ -194,6 +221,7 @@ function restartGame() {
     isGameStarted = false; 
     isPaused = false;
     isGameOver = false;
+    isCountdownActive = false;
     scoreText.innerText = score;
     waveText.innerText = wave;
     pauseBtn.innerText = "START";
@@ -216,11 +244,9 @@ resetBtn.addEventListener("click", restartGame);
 function gameLoop(timestamp) {
     if (!lastTime) lastTime = timestamp;
     
-    // Seconds format breakdown calculations
     let dt = (timestamp - lastTime) / 1000;
     lastTime = timestamp;
 
-    // Delta compression caps to prevent breaks during heavy background frame lag
     if (dt > 0.1) dt = 0.1; 
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -229,7 +255,8 @@ function gameLoop(timestamp) {
     drawPaddle();
     drawBall();
 
-    if (!isGameStarted) {
+    // 1. Initial State UI
+    if (!isGameStarted && !isCountdownActive) {
         ctx.fillStyle = "rgba(2, 12, 4, 0.8)";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.font = "bold 16px sans-serif";
@@ -237,41 +264,65 @@ function gameLoop(timestamp) {
         ctx.textAlign = "center";
         ctx.fillText("CLICK THE START BUTTON TO PLAY", canvas.width / 2, canvas.height / 2);
     } 
-    else if (!isPaused && !isGameOver) {
-        collisionDetection();
-
-        if (x + (dx * dt) > canvas.width - ballRadius || x + (dx * dt) < ballRadius) {
-            dx = -dx;
-        }
-        if (y + (dy * dt) < ballRadius) {
-            dy = -dy;
-        } 
-        else if (y + (dy * dt) > canvas.height - ballRadius) {
-            if (x > paddleX && x < paddleX + paddleWidth) {
-                dy = -dy;
-            } else {
-                triggerGameOver();
+    // 2. Wave Countdown Intermission Overlay State
+    else if (isCountdownActive) {
+        countdownTimer += dt;
+        if (countdownTimer >= 1.0) {
+            countdownValue--;
+            countdownTimer = 0;
+            
+            if (countdownValue <= 0) {
+                // Intermission end: Setup next wave scaling engine speeds safely
+                isCountdownActive = false;
+                wave++;
+                waveText.innerText = wave;
+                initBricks();
+                resetBallAndPaddle();
+                
+                const currentSpeed = baseSpeed + (wave * 15);
+                dx = dx > 0 ? currentSpeed : -currentSpeed;
+                dy = -Math.abs(currentSpeed); // Always fire straight up
             }
         }
 
-        // Keyboard tracking fallback calculation engine
-        if (rightPressed && paddleX < canvas.width - paddleWidth) {
-            paddleX += 300 * dt; // 300px per second frame locked speed
-        } else if (leftPressed && paddleX > 0) {
-            paddleX -= 300 * dt;
+        // Render Countdown Graphics Onscreen UI
+        ctx.fillStyle = "rgba(2, 12, 4, 0.75)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.textAlign = "center";
+        
+        ctx.font = "bold 18px sans-serif";
+        ctx.fillStyle = "#39ff14";
+        ctx.fillText("WAVE COMPLETED!", canvas.width / 2, canvas.height / 2 - 20);
+        
+        ctx.font = "14px sans-serif";
+        ctx.fillStyle = "#ffffff";
+        ctx.fillText(`Next Wave starts in: ${countdownValue}`, canvas.width / 2, canvas.height / 2 + 15);
+    }
+    // 3. Main Running Physics State Loop
+    else if (!isPaused && !isGameOver) {
+        collisionDetection();
+
+        let nextX = x + dx * dt;
+        let nextY = y + dy * dt;
+
+        // Hard clamping structural canvas wall checks
+        if (nextX > canvas.width - ballRadius) {
+            dx = -dx;
+            x = canvas.width - ballRadius;
+        } else if (nextX < ballRadius) {
+            dx = -dx;
+            x = ballRadius;
+        } else {
+            x = nextX;
         }
 
-        // Ball movement calculation locked tightly to actual real-time spent 
-        x += dx * dt;
-        y += dy * dt;
-    }
+        // Perfect Paddle Top Surface Target Edge Check
+        const paddleTopY = canvas.height - paddleHeight;
 
-    requestAnimationFrame(gameLoop);
-}
-
-initBricks();
-// First framework timestamp initialization anchor trigger
-requestAnimationFrame((timestamp) => {
-    lastTime = timestamp;
-    gameLoop(timestamp);
-});
+        if (nextY < ballRadius) {
+            dy = -dy;
+            y = ballRadius;
+        } 
+        // Bug Fix: strict detection to see if ball crosses the paddle's top line
+        else if (nextY >= paddleTopY - ballRadius) {
+if (x >= paddleX && x <= paddleX + paddleWidth && y <= paddleTopY) {dy = -dy;y = paddleTopY - ballRadius; // Instantly push ball out to the top edge surface} else if (nextY > canvas.height - ballRadius) {triggerGameOver();} else {y = nextY;}} else {y = nextY;}// Handle Keyboard input updatesif (rightPressed && paddleX < canvas.width - paddleWidth) {paddleX += 300 * dt;if (paddleX > canvas.width - paddleWidth) paddleX = canvas.width - paddleWidth;} else if (leftPressed && paddleX > 0) {paddleX -= 300 * dt;if (paddleX < 0) paddleX = 0;}}requestAnimationFrame(gameLoop);}initBricks();requestAnimationFrame((timestamp) => {lastTime = timestamp;gameLoop(timestamp);});
