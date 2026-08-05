@@ -69,7 +69,7 @@ document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
 document.addEventListener("mousemove", mouseMoveHandler, false);
 
-// Improved Touch Control: Pura slide/drag behavior dynamic tracking ke sath
+// Smooth Slide/Drag Touch Control For Mobile
 let touchStartX = null;
 canvas.addEventListener("touchstart", (e) => {
     const touch = e.touches[0];
@@ -84,10 +84,8 @@ canvas.addEventListener("touchmove", (e) => {
     const rect = canvas.getBoundingClientRect();
     const touchX = e.touches[0].clientX - rect.left;
     
-    // Smooth sliding calculation based on drag offset
     paddleX = touchX - paddleWidth / 2;
     
-    // Keep paddle inside canvas boundaries
     if (paddleX < 0) paddleX = 0;
     if (paddleX > canvas.width - paddleWidth) paddleX = canvas.width - paddleWidth;
 }, { passive: false });
@@ -122,7 +120,6 @@ function collisionDetection() {
             let b = bricks[c][r];
             if (b.status === 1) {
                 activeBricks++;
-                // Strict directional boundaries check to avoid double overlaps
                 if (x + ballRadius > b.x && x - ballRadius < b.x + brickWidth &&
                     y + ballRadius > b.y && y - ballRadius < b.y + brickHeight) {
                     dy = -dy;
@@ -135,7 +132,6 @@ function collisionDetection() {
         }
     }
 
-    // Trigger Intermission Engine instead of direct flash-skip
     if (activeBricks === 0 && !isCountdownActive) {
         startWaveCountdown();
     }
@@ -150,7 +146,6 @@ function startWaveCountdown() {
 
 function resetBallAndPaddle() {
     x = canvas.width / 2;
-    // Set position safely resting right above the paddle top height
     y = canvas.height - paddleHeight - ballRadius - 2;
     paddleX = (canvas.width - paddleWidth) / 2;
 }
@@ -272,7 +267,6 @@ function gameLoop(timestamp) {
             countdownTimer = 0;
             
             if (countdownValue <= 0) {
-                // Intermission end: Setup next wave scaling engine speeds safely
                 isCountdownActive = false;
                 wave++;
                 waveText.innerText = wave;
@@ -281,22 +275,21 @@ function gameLoop(timestamp) {
                 
                 const currentSpeed = baseSpeed + (wave * 15);
                 dx = dx > 0 ? currentSpeed : -currentSpeed;
-                dy = -Math.abs(currentSpeed); // Always fire straight up
+                dy = -Math.abs(currentSpeed);
             }
         }
 
-        // Render Countdown Graphics Onscreen UI
-        ctx.fillStyle = "rgba(2, 12, 4, 0.75)";
+        ctx.fillStyle = "rgba(2, 12, 4, 0.85)";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.textAlign = "center";
         
-        ctx.font = "bold 18px sans-serif";
+        ctx.font = "bold 20px sans-serif";
         ctx.fillStyle = "#39ff14";
-        ctx.fillText("WAVE COMPLETED!", canvas.width / 2, canvas.height / 2 - 20);
+        ctx.fillText(`WAVE ${wave} COMPLETED!`, canvas.width / 2, canvas.height / 2 - 25);
         
-        ctx.font = "14px sans-serif";
+        ctx.font = "bold 16px sans-serif";
         ctx.fillStyle = "#ffffff";
-        ctx.fillText(`Next Wave starts in: ${countdownValue}`, canvas.width / 2, canvas.height / 2 + 15);
+        ctx.fillText(`Wave ${wave + 1} starts in ${countdownValue}...`, canvas.width / 2, canvas.height / 2 + 15);
     }
     // 3. Main Running Physics State Loop
     else if (!isPaused && !isGameOver) {
@@ -305,7 +298,6 @@ function gameLoop(timestamp) {
         let nextX = x + dx * dt;
         let nextY = y + dy * dt;
 
-        // Hard clamping structural canvas wall checks
         if (nextX > canvas.width - ballRadius) {
             dx = -dx;
             x = canvas.width - ballRadius;
@@ -316,13 +308,32 @@ function gameLoop(timestamp) {
             x = nextX;
         }
 
-        // Perfect Paddle Top Surface Target Edge Check
         const paddleTopY = canvas.height - paddleHeight;
 
         if (nextY < ballRadius) {
             dy = -dy;
             y = ballRadius;
         } 
-        // Bug Fix: strict detection to see if ball crosses the paddle's top line
         else if (nextY >= paddleTopY - ballRadius) {
-if (x >= paddleX && x <= paddleX + paddleWidth && y <= paddleTopY) {dy = -dy;y = paddleTopY - ballRadius; // Instantly push ball out to the top edge surface} else if (nextY > canvas.height - ballRadius) {triggerGameOver();} else {y = nextY;}} else {y = nextY;}// Handle Keyboard input updatesif (rightPressed && paddleX < canvas.width - paddleWidth) {paddleX += 300 * dt;if (paddleX > canvas.width - paddleWidth) paddleX = canvas.width - paddleWidth;} else if (leftPressed && paddleX > 0) {paddleX -= 300 * dt;if (paddleX < 0) paddleX = 0;}}requestAnimationFrame(gameLoop);}initBricks();requestAnimationFrame((timestamp) => {lastTime = timestamp;gameLoop(timestamp);});
+            // Check collision with the upper edge of the paddle
+            if (x >= paddleX && x <= paddleX + paddleWidth && y <= paddleTopY) {
+                dy = -dy;
+                y = paddleTopY - ballRadius; 
+            } else if (nextY > canvas.height - ballRadius) {
+                triggerGameOver();
+            } else {
+                y = nextY;
+            }
+        } else {
+            y = nextY;
+        }
+
+        if (rightPressed && paddleX < canvas.width - paddleWidth) {
+            paddleX += 300 * dt;
+            if (paddleX > canvas.width - paddleWidth) paddleX = canvas.width - paddleWidth;
+        } else if (leftPressed && paddleX > 0) {
+            paddleX -= 300 * dt;
+            if (paddleX < 0) paddleX = 0;
+}
+    }requestAnimationFrame(gameLoop);
+}initBricks();requestAnimationFrame((timestamp) => {lastTime = timestamp;gameLoop(timestamp);});
